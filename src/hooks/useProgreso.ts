@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 
-export function useProgreso(temaId: string) {
+// TODO Fase 3: recibirá temaId y persistirá en progreso_temas
+export function useProgreso() {
   const [dominio, setDominio] = useState(0);
   const [loading, setLoading] = useState(false);
 
