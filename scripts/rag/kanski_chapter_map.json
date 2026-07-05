@@ -1,0 +1,452 @@
+{
+  "fuente": "Kanski Oftalmologia Clinica 8a Edicion_booksmedicos.org.pdf",
+  "paginas_totales": 881,
+  "capitulos": [
+    {
+      "numero": 1,
+      "titulo_original": "Capítulo 1 - Párpados",
+      "titulo_es": "Capítulo 1 - Párpados",
+      "bloque_oir": "Órbita y párpados",
+      "paginas": [
+        9,
+        70
+      ],
+      "subtemas": [
+        "Introducción",
+        "Lesiones no neoplásicas",
+        "Tumores epidérmicos benignos",
+        "Lesiones pigmentadas benignas",
+        "Tumores benignos de anejos",
+        "Otros tumores benignos",
+        "Tumores malignos",
+        "Alteraciones de las pestañas",
+        "Enfermedades alérgicas",
+        "Infecciones bacterianas",
+        "Infecciones víricas",
+        "Blefaritis",
+        "Ptosis",
+        "Ectropión",
+        "Entropión"
+      ]
+    },
+    {
+      "numero": 2,
+      "titulo_original": "Capítulo 2 - Sistema de drenaje lagrimal",
+      "titulo_es": "Capítulo 2 - Sistema de drenaje lagrimal",
+      "bloque_oir": "Aparato lagrimal y superficie ocular",
+      "paginas": [
+        71,
+        83
+      ],
+      "subtemas": [
+        "Introducción",
+        "Obstrucción adquirida",
+        "Obstrucción congénita",
+        "Canaliculitis crónica",
+        "Dacriocistitis"
+      ]
+    },
+    {
+      "numero": 3,
+      "titulo_original": "Capítulo 3 - Órbita",
+      "titulo_es": "Capítulo 3 - Órbita",
+      "bloque_oir": "Órbita y párpados",
+      "paginas": [
+        84,
+        124
+      ],
+      "subtemas": [
+        "Introducción",
+        "Oftalmopatía tiroidea",
+        "Infecciones",
+        "Enfermedades inflamatorias no infecciosas",
+        "Anomalías vasculares no neoplásicas",
+        "Lesiones quísticas",
+        "Tumores vasculares",
+        "Tumores de la glándula lagrimal",
+        "Tumores nerviosos",
+        "Linfoma",
+        "Rabdomiosarcoma",
+        "Tumores metastásicos",
+        "Cavidad anoftálmica",
+        "Craneosinostosis"
+      ]
+    },
+    {
+      "numero": 4,
+      "titulo_original": "Capítulo 4 - Ojo seco",
+      "titulo_es": "Capítulo 4 - Ojo seco",
+      "bloque_oir": "Aparato lagrimal y superficie ocular",
+      "paginas": [
+        125,
+        135
+      ],
+      "subtemas": [
+        "Introducción",
+        "Síndrome de Sjögren",
+        "Cuadro clínico",
+        "Pruebas complementarias",
+        "Tratamiento"
+      ]
+    },
+    {
+      "numero": 5,
+      "titulo_original": "Capítulo 5 - Conjuntiva",
+      "titulo_es": "Capítulo 5 - Conjuntiva",
+      "bloque_oir": "Conjuntiva",
+      "paginas": [
+        136,
+        171
+      ],
+      "subtemas": [
+        "Introducción",
+        "Conjuntivitis bacteriana",
+        "Conjuntivitis vírica",
+        "Conjuntivitis alérgica",
+        "Conjuntivitis en enfermedades cutaneomucosas ampollosas",
+        "Otras conjuntivitis",
+        "Degeneraciones",
+        "Hemorragia subconjuntival"
+      ]
+    },
+    {
+      "numero": 6,
+      "titulo_original": "Capítulo 6 - Córnea",
+      "titulo_es": "Capítulo 6 - Córnea",
+      "bloque_oir": "Córnea",
+      "paginas": [
+        172,
+        242
+      ],
+      "subtemas": [
+        "Introducción",
+        "Queratitis bacteriana",
+        "Queratitis fúngica",
+        "Queratitis por herpes simple",
+        "Herpes zóster oftálmico",
+        "Queratitis intersticial",
+        "Queratitis por protozoos",
+        "Queratitis por helmintos",
+        "Queratopatías por hipersensibilidad a bacterias",
+        "Rosácea",
+        "Ulceración/adelgazamiento corneal periférico",
+        "Queratopatía neurotrófica",
+        "Queratopatía por exposición",
+        "Otras queratopatías",
+        "Ectasias corneales"
+      ]
+    },
+    {
+      "numero": 7,
+      "titulo_original": "Capítulo 7 - Cirugía corneal y refractiva",
+      "titulo_es": "Capítulo 7 - Cirugía corneal y refractiva",
+      "bloque_oir": "Córnea",
+      "paginas": [
+        243,
+        255
+      ],
+      "subtemas": [
+        "Queratoplastia",
+        "Queratoprótesis",
+        "Cirugía refractiva"
+      ]
+    },
+    {
+      "numero": 8,
+      "titulo_original": "Capítulo 8 - Epiesclera y esclera",
+      "titulo_es": "Capítulo 8 - Epiesclera y esclera",
+      "bloque_oir": "Esclera y epiesclera",
+      "paginas": [
+        256,
+        270
+      ],
+      "subtemas": [
+        "Anatomía",
+        "Epiescleritis",
+        "Escleritis de origen inmunitario",
+        "Escleritis infecciosa",
+        "Coloración escleral",
+        "Escleróticas azules",
+        "Otras enfermedades"
+      ]
+    },
+    {
+      "numero": 9,
+      "titulo_original": "Capítulo 9 - Cristalino",
+      "titulo_es": "Capítulo 9 - Cristalino",
+      "bloque_oir": "Cristalino",
+      "paginas": [
+        271,
+        305
+      ],
+      "subtemas": [
+        "Catarata adquirida",
+        "Tratamiento de la catarata senil",
+        "Catarata congénita",
+        "Ectopia del cristalino",
+        "Anomalías de la forma del cristalino"
+      ]
+    },
+    {
+      "numero": 10,
+      "titulo_original": "Capítulo 10 - Glaucoma",
+      "titulo_es": "Capítulo 10 - Glaucoma",
+      "bloque_oir": "Glaucoma",
+      "paginas": [
+        306,
+        395
+      ],
+      "subtemas": [
+        "Introducción",
+        "Tonometría",
+        "Gonioscopia",
+        "Evaluación de la cabeza del nervio óptico",
+        "Pruebas de imagen en el glaucoma",
+        "Perimetría (campimetría)",
+        "Tratamiento médico del glaucoma",
+        "Tratamiento del glaucoma con láser",
+        "Trabeculectomía",
+        "Cirugía no penetrante del glaucoma",
+        "Dispositivos de drenaje",
+        "Hipertensión ocular",
+        "Glaucoma primario de ángulo abierto",
+        "Glaucoma normotensional",
+        "Glaucoma por cierre angular primario"
+      ]
+    },
+    {
+      "numero": 11,
+      "titulo_original": "Capítulo 11 - Uveítis",
+      "titulo_es": "Capítulo 11 - Uveítis",
+      "bloque_oir": "Úvea",
+      "paginas": [
+        396,
+        466
+      ],
+      "subtemas": [
+        "Clasificación",
+        "Uveítis anterior",
+        "Uveítis en las espondiloartropatías",
+        "Síndrome de uveítis de Fuchs",
+        "Uveítis en la artritis infantil idiopática",
+        "Uveítis en enfermedades intestinales",
+        "Uveítis en enfermedades renales",
+        "Uveítis intermedia",
+        "Síndrome de Vogt-Koyanagi-Harada (VKH)",
+        "Oftalmía simpática",
+        "Uveítis inducida por el cristalino",
+        "Sarcoidosis",
+        "Enfermedad de Behçet",
+        "Uveítis por parásitos",
+        "Uveítis víricas"
+      ]
+    },
+    {
+      "numero": 12,
+      "titulo_original": "Capítulo 12 - Tumores oculares",
+      "titulo_es": "Capítulo 12 - Tumores oculares",
+      "bloque_oir": "Tumores oculares",
+      "paginas": [
+        467,
+        518
+      ],
+      "subtemas": [
+        "Tumores epibulbares benignos",
+        "Tumores epibulbares malignos y premalignos",
+        "Tumores de iris",
+        "Quistes del iris",
+        "Tumores del cuerpo ciliar",
+        "Tumores coroideos",
+        "Tumores de la retina neurosensorial",
+        "Tumores vasculares retinianos",
+        "Linfoma intraocular primario",
+        "Tumores del epitelio pigmentario retiniano",
+        "Síndromes paraneoplásicos"
+      ]
+    },
+    {
+      "numero": 13,
+      "titulo_original": "Capítulo 13 - Vasculopatías retinianas",
+      "titulo_es": "Capítulo 13 - Vasculopatías retinianas",
+      "bloque_oir": "Retina",
+      "paginas": [
+        519,
+        577
+      ],
+      "subtemas": [
+        "Circulación retiniana",
+        "Retinopatía diabética",
+        "Retinopatía no diabética",
+        "Oclusiones venosas retinianas",
+        "Oclusiones arteriales retinianas",
+        "Síndrome isquémico ocular",
+        "Oftalmopatía hipertensiva",
+        "Retinopatía por drepanocitosis",
+        "Retinopatía por talasemia",
+        "Retinopatía del prematuro",
+        "Macroaneurisma arterial retiniano",
+        "Telangiectasias retinianas primarias",
+        "Enfermedad de Eales",
+        "Retinopatía por radiación",
+        "Retinopatía de Purtscher"
+      ]
+    },
+    {
+      "numero": 14,
+      "titulo_original": "Capítulo 14 - Maculopatías adquiridas",
+      "titulo_es": "Capítulo 14 - Maculopatías adquiridas",
+      "bloque_oir": "Retina",
+      "paginas": [
+        578,
+        638
+      ],
+      "subtemas": [
+        "Introducción",
+        "Evaluación clínica de las maculopatías",
+        "Pruebas complementarias en las maculopatías",
+        "Degeneración macular asociada a la edad",
+        "Proliferación angiomatosa retiniana",
+        "Vasculopatía coroidea polipoidal",
+        "Coriorretinopatía hemorrágica exudativa periférica",
+        "Neovascularización coroidea idiopática",
+        "Trastornos de la interfase vitreomacular",
+        "Coriorretinopatía serosa central",
+        "Telangiectasias maculares idiopáticas",
+        "Edema macular cistoide",
+        "Edema macular microquístico",
+        "Miopía degenerativa",
+        "Estrías angioides"
+      ]
+    },
+    {
+      "numero": 15,
+      "titulo_original": "Capítulo 15 - Distrofias hereditarias del fondo de ojo",
+      "titulo_es": "Capítulo 15 - Distrofias hereditarias del fondo de ojo",
+      "bloque_oir": "Retina",
+      "paginas": [
+        639,
+        678
+      ],
+      "subtemas": [
+        "Introducción",
+        "Pruebas complementarias",
+        "Distrofias de fotorreceptores generalizadas",
+        "Distrofias maculares",
+        "Distrofias coroideas generalizadas",
+        "Vitreorretinopatías hereditarias",
+        "Albinismo",
+        "Mancha rojo cereza macular"
+      ]
+    },
+    {
+      "numero": 16,
+      "titulo_original": "Capítulo 16 - Desprendimiento de retina",
+      "titulo_es": "Capítulo 16 - Desprendimiento de retina",
+      "bloque_oir": "Retina",
+      "paginas": [
+        679,
+        717
+      ],
+      "subtemas": [
+        "Introducción",
+        "Lesiones periféricas que predisponen al desprendimiento de retina",
+        "Desprendimiento vítreo posterior",
+        "Roturas retinianas",
+        "Desprendimiento de retina regmatógeno",
+        "Desprendimiento de retina traccional",
+        "Desprendimiento de retina exudativo",
+        "Vitrectomía por pars plana"
+      ]
+    },
+    {
+      "numero": 17,
+      "titulo_original": "Capítulo 17 - Opacidades vítreas",
+      "titulo_es": "Capítulo 17 - Opacidades vítreas",
+      "bloque_oir": "Retina",
+      "paginas": [
+        718,
+        723
+      ],
+      "subtemas": [
+        "Introducción",
+        "Moscas volantes",
+        "Hemorragia vítrea",
+        "Hialosis asteroide",
+        "Sinquisis centelleante",
+        "Amiloidosis",
+        "Quiste vítreo",
+        "Vasculatura fetal persistente"
+      ]
+    },
+    {
+      "numero": 18,
+      "titulo_original": "Capítulo 18 - Estrabismo",
+      "titulo_es": "Capítulo 18 - Estrabismo",
+      "bloque_oir": "Estrabismo y oftalmología pediátrica",
+      "paginas": [
+        724,
+        769
+      ],
+      "subtemas": [
+        "Introducción",
+        "Ambliopía",
+        "Evaluación clínica",
+        "Seudoestrabismo",
+        "Heteroforia",
+        "Anomalías de las vergencias",
+        "Esotropía",
+        "Exotropía",
+        "Enfermedades por desnervación craneal congénita",
+        "Déficit de elevación monocular",
+        "Síndrome de Brown",
+        "Patrones alfabéticos",
+        "Cirugía",
+        "Quimiodesnervación con toxina botulínica"
+      ]
+    },
+    {
+      "numero": 19,
+      "titulo_original": "Capítulo 19 - Neuroftalmología",
+      "titulo_es": "Capítulo 19 - Neuroftalmología",
+      "bloque_oir": "Neuro-oftalmología",
+      "paginas": [
+        770,
+        846
+      ],
+      "subtemas": [
+        "Neurorradiología",
+        "Nervio óptico",
+        "Pupilas",
+        "Quiasma",
+        "Vías retroquiasmáticas",
+        "Nervios oculomotores",
+        "Trastornos supranucleares de los movimientos oculares",
+        "Nistagmo",
+        "Miopatías oculares",
+        "Síndrome de Miller Fisher",
+        "Neurofibromatosis",
+        "Migraña",
+        "Neuralgias",
+        "Espasmo facial"
+      ]
+    },
+    {
+      "numero": 20,
+      "titulo_original": "Capítulo 20 - Efectos secundarios oftalmológicos de medicamentos sistémicos",
+      "titulo_es": "Capítulo 20 - Efectos secundarios oftalmológicos de medicamentos sistémicos",
+      "bloque_oir": "Farmacología ocular",
+      "paginas": [
+        847,
+        856
+      ],
+      "subtemas": [
+        "Córnea",
+        "Derrame ciliar",
+        "Cristalino",
+        "Uveítis",
+        "Retina",
+        "Nervio óptico"
+      ]
+    }
+  ]
+}
