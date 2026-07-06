@@ -1,4 +1,4 @@
-import type { ConfigPlan, SesionPlan, TipoSesion } from "./types";
+import type { TipoSesion } from "./types";
 import { UMBRAL_REFUERZO } from "./types";
 
 export function necesitaRefuerzo(dominio: number): boolean {

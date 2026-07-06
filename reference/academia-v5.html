@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OptoAcademia — Oposiciones Oftalmología</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e1117;
+  --bg2: #161b26;
+  --bg3: #1e2535;
+  --bg4: #252d40;
+  --surface: #1a2030;
+  --border: #2a3347;
+  --border2: #3a4560;
+  --accent: #4ade80;
+  --accent2: #22c55e;
+  --accent-dim: rgba(74,222,128,0.12);
+  --accent-glow: rgba(74,222,128,0.25);
+  --blue: #60a5fa;
+  --blue-dim: rgba(96,165,250,0.12);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.12);
+  --coral: #f87171;
+  --coral-dim: rgba(248,113,113,0.12);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167,139,250,0.12);
+  --teal: #2dd4bf;
+  --teal-dim: rgba(45,212,191,0.12);
+  --text: #e8ecf4;
+  --text2: #8b95ab;
+  --text3: #5a6477;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --r: 12px;
+  --r2: 8px;
+  --r3: 6px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── SCREENS ── */
+.screen { display:none; min-height:100vh; }
+.screen.active { display:flex; flex-direction:column; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius:3px; }
+
+/* ── COMPONENTS ── */
+.btn {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 20px; border-radius:var(--r2);
+  font-family:var(--font-body); font-size:14px; font-weight:500;
+  border:none; cursor:pointer; transition:all .2s; text-decoration:none;
+  white-space:nowrap;
+}
+.btn-primary { background:var(--accent); color:#0a1a0e; }
+.btn-primary:hover { background:var(--accent2); transform:translateY(-1px); }
+.btn-secondary { background:var(--bg3); color:var(--text); border:1px solid var(--border); }
+.btn-secondary:hover { border-color:var(--border2); background:var(--bg4); }
+.btn-ghost { background:transparent; color:var(--text2); }
+.btn-ghost:hover { color:var(--text); background:var(--bg3); }
+.btn-sm { padding:7px 14px; font-size:13px; }
+.btn-icon { padding:8px; border-radius:var(--r2); background:var(--bg3); border:1px solid var(--border); color:var(--text2); cursor:pointer; transition:all .2s; font-size:16px; }
+.btn-icon:hover { color:var(--text); border-color:var(--border2); }
+
+.badge {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500;
+}
+.badge-green { background:var(--accent-dim); color:var(--accent); }
+.badge-blue { background:var(--blue-dim); color:var(--blue); }
+.badge-amber { background:var(--amber-dim); color:var(--amber); }
+.badge-coral { background:var(--coral-dim); color:var(--coral); }
+.badge-purple { background:var(--purple-dim); color:var(--purple); }
+.badge-teal { background:var(--teal-dim); color:var(--teal); }
+
+.card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+}
+.card:hover { border-color:var(--border2); }
+
+.input {
+  width:100%; padding:11px 14px;
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:var(--r2); color:var(--text);
+  font-family:var(--font-body); font-size:14px;
+  outline:none; transition:border .2s;
+}
+.input:focus { border-color:var(--accent); }
+.input::placeholder { color:var(--text3); }
+
+select.input { cursor:pointer; }
+option { background:var(--bg3); }
+
+label { display:block; font-size:13px; color:var(--text2); margin-bottom:6px; font-weight:500; }
+
+/* ── PROGRESS BAR ── */
+.progress-bar { height:4px; background:var(--bg3); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width .5s ease; }
+
+/* ── TOPBAR ── */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 28px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:100;
+}
+.logo {
+  font-family:var(--font-display); font-size:18px; font-weight:800;
+  color:var(--text); display:flex; align-items:center; gap:8px;
+}
+.logo-dot { width:8px; height:8px; background:var(--accent); border-radius:50%; }
+.topbar-nav { display:flex; align-items:center; gap:6px; }
+.nav-item {
+  padding:7px 14px; border-radius:var(--r2); font-size:13px; font-weight:500;
+  color:var(--text2); cursor:pointer; transition:all .2s;
+}
+.nav-item:hover, .nav-item.active { color:var(--text); background:var(--bg3); }
+.nav-item.active { color:var(--accent); }
+
+/* ── SIDEBAR LAYOUT ── */
+.app-layout { display:flex; flex:1; overflow:hidden; }
+.sidebar {
+  width:220px; min-height:100%; background:var(--bg2);
+  border-right:1px solid var(--border);
+  padding:20px 0; flex-shrink:0;
+  display:flex; flex-direction:column;
+}
+.sidebar-section { padding:0 14px; margin-bottom:6px; }
+.sidebar-label { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.08em; text-transform:uppercase; padding:0 8px; margin-bottom:8px; }
+.sidebar-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:var(--r2);
+  font-size:13px; font-weight:500; color:var(--text2);
+  cursor:pointer; transition:all .2s; margin-bottom:2px;
+}
+.sidebar-item:hover { color:var(--text); background:var(--bg3); }
+.sidebar-item.active { color:var(--accent); background:var(--accent-dim); }
+.sidebar-icon { font-size:16px; width:20px; text-align:center; }
+.sidebar-spacer { flex:1; }
+.sidebar-user {
+  margin:0 14px; padding:12px; border-radius:var(--r2);
+  background:var(--bg3); border:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:linear-gradient(135deg, var(--accent-dim), var(--blue-dim));
+  border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:600; color:var(--accent);
+}
+.user-name { font-size:13px; font-weight:500; color:var(--text); }
+.user-role { font-size:11px; color:var(--text3); }
+
+/* ── MAIN CONTENT ── */
+.main { flex:1; overflow-y:auto; padding:28px; }
+
+/* ── SECTION HEADING ── */
+.section-heading { margin-bottom:24px; }
+.section-eyebrow { font-size:11px; font-weight:600; color:var(--accent); letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px; }
+.section-title { font-family:var(--font-display); font-size:24px; font-weight:700; color:var(--text); }
+.section-sub { font-size:14px; color:var(--text2); margin-top:4px; }
+
+/* ── STAT CARDS ── */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px;
+}
+.stat-label { font-size:12px; color:var(--text3); margin-bottom:6px; }
+.stat-value { font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--text); }
+.stat-sub { font-size:12px; color:var(--text2); margin-top:2px; }
+.stat-icon { font-size:20px; margin-bottom:8px; }
+
+/* ── GRID LAYOUTS ── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+
+/* ── COURSE CARDS ── */
+.course-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden;
+  cursor:pointer; transition:all .25s;
+}
+.course-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+.course-card-img {
+  height:110px; display:flex; align-items:center; justify-content:center;
+  font-size:44px;
+}
+.course-card-body { padding:18px; }
+.course-card-title { font-weight:600; font-size:15px; color:var(--text); margin-bottom:6px; }
+.course-card-meta { font-size:12px; color:var(--text2); margin-bottom:12px; }
+.course-progress-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text2); margin-bottom:6px; }
+
+/* ── SESSION PHASES ── */
+.phase-tabs { display:flex; gap:4px; margin-bottom:24px; overflow-x:auto; padding-bottom:4px; }
+.phase-tab {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  padding:10px 16px; border-radius:var(--r2); cursor:pointer; transition:all .2s;
+  border:1px solid var(--border); background:var(--surface);
+  min-width:100px; text-align:center; flex-shrink:0;
+}
+.phase-tab:hover { border-color:var(--border2); }
+.phase-tab.active { border-color:var(--accent); background:var(--accent-dim); }
+.phase-tab.done { border-color:var(--border2); opacity:.7; }
+.phase-tab .phase-num { font-size:11px; font-weight:600; color:var(--text3); }
+.phase-tab.active .phase-num { color:var(--accent); }
+.phase-tab .phase-name { font-size:13px; font-weight:500; color:var(--text2); }
+.phase-tab.active .phase-name { color:var(--accent); }
+.phase-tab .phase-icon { font-size:18px; }
+
+.phase-content { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:28px; min-height:360px; }
+
+/* ── FLASHCARD ── */
+.flashcard-wrapper { perspective:1000px; }
+.flashcard {
+  width:100%; max-width:480px; height:220px; margin:0 auto;
+  position:relative; cursor:pointer;
+  transform-style:preserve-3d; transition:transform .5s;
+}
+.flashcard.flipped { transform:rotateY(180deg); }
+.flashcard-front, .flashcard-back {
+  position:absolute; inset:0; backface-visibility:hidden;
+  background:var(--bg3); border:1px solid var(--border2);
+  border-radius:var(--r); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; padding:24px; text-align:center;
+}
+.flashcard-back { transform:rotateY(180deg); background:var(--accent-dim); border-color:var(--accent); }
+.fc-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.08em; margin-bottom:12px; }
+.fc-text { font-size:16px; font-weight:500; color:var(--text); line-height:1.5; }
+.flashcard-back .fc-text { color:var(--accent); }
+.fc-hint { font-size:12px; color:var(--text3); margin-top:12px; }
+
+/* ── EXAM ── */
+.exam-question { margin-bottom:20px; }
+.exam-q-text { font-size:16px; font-weight:500; color:var(--text); margin-bottom:16px; line-height:1.6; }
+.exam-options { display:flex; flex-direction:column; gap:8px; }
+.exam-option {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 16px; border-radius:var(--r2);
+  border:1px solid var(--border); background:var(--bg3);
+  cursor:pointer; transition:all .2s; font-size:14px;
+}
+.exam-option:hover { border-color:var(--border2); }
+.exam-option.selected { border-color:var(--blue); background:var(--blue-dim); }
+.exam-option.correct { border-color:var(--accent); background:var(--accent-dim); }
+.exam-option.wrong { border-color:var(--coral); background:var(--coral-dim); }
+.exam-option-letter {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--bg4); border:1px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:600; color:var(--text2); flex-shrink:0;
+}
+
+/* ── CHATBOT ── */
+.chat-widget {
+  position:fixed; bottom:20px; right:20px; z-index:999;
+}
+.chat-toggle {
+  width:52px; height:52px; border-radius:50%;
+  background:var(--accent); color:#0a1a0e;
+  border:none; font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px var(--accent-glow); transition:all .2s;
+}
+.chat-toggle:hover { transform:scale(1.08); }
+.chat-panel {
+  position:absolute; bottom:64px; right:0;
+  width:340px; background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden;
+  display:none; flex-direction:column;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.chat-panel.open { display:flex; }
+.chat-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+.chat-avatar { width:32px; height:32px; border-radius:50%; background:var(--accent-dim); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.chat-info { flex:1; }
+.chat-name { font-size:14px; font-weight:600; color:var(--text); }
+.chat-status { font-size:11px; color:var(--accent); }
+.chat-messages { flex:1; max-height:280px; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; }
+.msg { display:flex; gap:8px; max-width:90%; }
+.msg.user { align-self:flex-end; flex-direction:row-reverse; }
+.msg-bubble { padding:9px 13px; border-radius:10px; font-size:13px; line-height:1.5; }
+.msg.ai .msg-bubble { background:var(--bg3); border:1px solid var(--border); color:var(--text); border-radius:4px 10px 10px 10px; }
+.msg.user .msg-bubble { background:var(--accent); color:#0a1a0e; border-radius:10px 4px 10px 10px; font-weight:500; }
+.msg-dot { width:28px; height:28px; border-radius:50%; background:var(--bg4); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.chat-input-row { padding:12px; border-top:1px solid var(--border); display:flex; gap:8px; }
+.chat-input { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:var(--r2); padding:9px 12px; color:var(--text); font-family:var(--font-body); font-size:13px; outline:none; resize:none; }
+.chat-input:focus { border-color:var(--accent); }
+.chat-send { width:36px; height:36px; border-radius:var(--r2); background:var(--accent); color:#0a1a0e; border:none; cursor:pointer; font-size:16px; transition:all .2s; display:flex; align-items:center; justify-content:center; }
+.chat-send:hover { background:var(--accent2); }
+.typing-indicator { display:flex; gap:4px; align-items:center; padding:4px 0; }
+.typing-dot { width:6px; height:6px; border-radius:50%; background:var(--text3); animation:typing .8s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay:.15s; }
+.typing-dot:nth-child(3) { animation-delay:.3s; }
+@keyframes typing { 0%,80%,100% { transform:scale(.8); opacity:.4; } 40% { transform:scale(1); opacity:1; } }
+
+/* ── CALENDAR ── */
+.calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-header-cell { text-align:center; font-size:11px; font-weight:600; color:var(--text3); padding:8px 0; text-transform:uppercase; letter-spacing:.06em; }
+.cal-day {
+  aspect-ratio:1; border-radius:var(--r2); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-size:13px;
+  cursor:pointer; transition:all .2s; position:relative; padding:4px;
+  border:1px solid transparent;
+}
+.cal-day:hover { background:var(--bg3); border-color:var(--border); }
+.cal-day.other-month { color:var(--text3); }
+.cal-day.today { border-color:var(--accent); color:var(--accent); font-weight:700; }
+.cal-day.has-session::after {
+  content:''; position:absolute; bottom:4px;
+  width:5px; height:5px; border-radius:50%; background:var(--accent);
+}
+.cal-day.done-session::after { background:var(--blue); }
+.cal-day.missed-session::after { background:var(--coral); }
+
+/* ── PLAN SETUP ── */
+.onboarding-steps { display:flex; align-items:center; gap:8px; margin-bottom:32px; }
+.ob-step {
+  display:flex; align-items:center; gap:8px; font-size:13px; font-weight:500;
+}
+.ob-step-num {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700;
+}
+.ob-step.done .ob-step-num { background:var(--accent); color:#0a1a0e; }
+.ob-step.active .ob-step-num { background:var(--blue-dim); color:var(--blue); border:1px solid var(--blue); }
+.ob-step.pending .ob-step-num { background:var(--bg3); color:var(--text3); border:1px solid var(--border); }
+.ob-step.done .ob-step-label { color:var(--text2); }
+.ob-step.active .ob-step-label { color:var(--text); }
+.ob-step.pending .ob-step-label { color:var(--text3); }
+.ob-connector { flex:1; height:1px; background:var(--border); }
+
+/* ── WEEKLY REPORT ── */
+.topic-bar { margin-bottom:12px; }
+.topic-bar-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px; }
+.topic-bar-track { height:8px; background:var(--bg3); border-radius:4px; overflow:hidden; }
+.topic-bar-fill { height:100%; border-radius:4px; transition:width .8s ease; }
+
+/* ── LOGIN ── */
+#screen-login {
+  background:radial-gradient(ellipse at 20% 50%, rgba(74,222,128,.06) 0%, transparent 60%),
+             radial-gradient(ellipse at 80% 20%, rgba(96,165,250,.05) 0%, transparent 50%),
+             var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh;
+}
+.login-box {
+  width:100%; max-width:400px; padding:40px;
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+}
+.login-logo { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.login-logo-icon { width:40px; height:40px; border-radius:10px; background:var(--accent-dim); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:20px; }
+.login-title { font-family:var(--font-display); font-size:22px; font-weight:800; color:var(--text); }
+.login-sub { font-size:13px; color:var(--text2); margin-bottom:32px; }
+.form-group { margin-bottom:16px; }
+.form-divider { display:flex; align-items:center; gap:12px; margin:20px 0; }
+.form-divider-line { flex:1; height:1px; background:var(--border); }
+.form-divider-text { font-size:12px; color:var(--text3); }
+.demo-btn {
+  width:100%; padding:12px; border-radius:var(--r2);
+  background:var(--bg3); border:1px solid var(--border);
+  color:var(--text); font-size:14px; font-weight:500;
+  cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.demo-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+/* ── BUROCRACIA ── */
+.burocr-timeline { position:relative; padding-left:28px; }
+.burocr-timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:var(--border); }
+.burocr-item { position:relative; margin-bottom:24px; }
+.burocr-dot { position:absolute; left:-23px; top:3px; width:14px; height:14px; border-radius:50%; border:2px solid var(--accent); background:var(--bg); }
+.burocr-dot.done { background:var(--accent); }
+.burocr-dot.next { border-color:var(--blue); box-shadow:0 0 0 3px var(--blue-dim); }
+.burocr-date { font-size:11px; font-weight:600; color:var(--accent); margin-bottom:4px; text-transform:uppercase; letter-spacing:.06em; }
+.burocr-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:4px; }
+.burocr-desc { font-size:13px; color:var(--text2); line-height:1.6; }
+
+/* ── CONCEPT MAP ── */
+.concept-map { width:100%; position:relative; }
+.concept-node {
+  background:var(--bg3); border:1px solid var(--border2);
+  border-radius:var(--r2); padding:10px 16px; font-size:13px; font-weight:500;
+  color:var(--text); display:inline-block; text-align:center; cursor:pointer;
+  transition:all .2s;
+}
+.concept-node:hover { border-color:var(--accent); color:var(--accent); }
+.concept-node.central { background:var(--accent-dim); border-color:var(--accent); color:var(--accent); font-weight:700; font-size:14px; }
+.concept-node.secondary { background:var(--blue-dim); border-color:var(--blue); color:var(--blue); }
+.concept-node.tertiary { background:var(--bg3); border-color:var(--border2); font-size:12px; }
+.concept-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+
+/* ── AI LOADING ── */
+.ai-loading { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; gap:16px; }
+.ai-spinner { width:40px; height:40px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.ai-loading-text { font-size:14px; color:var(--text2); }
+
+/* ── NOTIFICATIONS ── */
+.notif-toast {
+  position:fixed; top:80px; right:20px; z-index:1000;
+  background:var(--surface); border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  border-radius:var(--r2); padding:14px 18px;
+  display:flex; align-items:flex-start; gap:12px;
+  width:320px; box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:slideIn .3s ease; pointer-events:none;
+}
+@keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+.notif-icon { font-size:18px; flex-shrink:0; }
+.notif-title { font-size:13px; font-weight:600; color:var(--text); }
+.notif-desc { font-size:12px; color:var(--text2); margin-top:2px; }
+
+/* ── API KEY BANNER ── */
+.api-banner {
+  background:var(--amber-dim); border:1px solid var(--amber);
+  border-radius:var(--r2); padding:12px 16px; margin-bottom:20px;
+  display:flex; align-items:center; gap:12px; font-size:13px;
+}
+.api-banner-icon { font-size:18px; }
+.api-banner-text { flex:1; color:var(--text); }
+.api-key-input { flex:2; background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:7px 12px; color:var(--text); font-size:12px; font-family:monospace; outline:none; }
+.api-key-input:focus { border-color:var(--amber); }
+.api-save-btn { background:var(--amber); color:#1a0e00; border:none; padding:7px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; }
+
+/* ── PLAN TABLE ── */
+.plan-week { margin-bottom:24px; }
+.plan-week-title { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.plan-day-row {
+  display:flex; align-items:center; gap:14px;
+  padding:10px 14px; border-radius:var(--r2);
+  margin-bottom:4px; transition:background .15s;
+}
+.plan-day-row:hover { background:var(--bg3); }
+.plan-day-name { font-size:12px; font-weight:600; color:var(--text3); width:36px; text-transform:uppercase; }
+.plan-day-date { font-size:12px; color:var(--text2); width:80px; }
+.plan-day-tema { font-size:13px; color:var(--text); flex:1; }
+.plan-day-dur { font-size:12px; color:var(--text3); }
+.plan-day-status { font-size:18px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width:768px) {
+  .sidebar { display:none; }
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .grid-2, .grid-3 { grid-template-columns:1fr; }
+  .main { padding:16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SCREEN: LOGIN                                  -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">👁️</div>
+      <div>
+        <div class="login-title">OptoAcademia</div>
+      </div>
+    </div>
+    <p class="login-sub">Plataforma de preparación de oposiciones de oftalmología · Andalucía</p>
+
+    <div id="api-banner-login" class="api-banner" style="margin-bottom:20px;">
+      <span class="api-banner-icon">🔑</span>
+      <div style="flex:1;">
+        <div style="font-weight:600;color:var(--amber);font-size:12px;margin-bottom:4px;">API KEY ANTHROPIC (para IA real)</div>
+        <input id="api-key-input-login" class="api-key-input" style="width:100%" type="password" placeholder="sk-ant-...  (opcional, activa el chatbot y generación IA)">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input class="input" type="email" placeholder="tu@email.com" id="login-email" value="demo@optopos.es">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input class="input" type="password" placeholder="••••••••" value="demo1234">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="doLogin()">Entrar →</button>
+
+    <div class="form-divider">
+      <div class="form-divider-line"></div>
+      <div class="form-divider-text">o accede rápido</div>
+      <div class="form-divider-line"></div>
+    </div>
+    <button class="demo-btn" onclick="doLogin()">👁️ Entrar como alumno demo</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- SCREEN: APP (Dashboard + todas las vistas)     -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="screen-app" class="screen">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      OptoAcademia
+    </div>
+    <div class="topbar-nav">
+      <div class="nav-item" onclick="showSection('dashboard')">Inicio</div>
+      <div class="nav-item" onclick="showSection('cursos')">Cursos</div>
+      <div class="nav-item" onclick="showSection('calendario')">Calendario</div>
+      <div class="nav-item" onclick="showSection('burocracia')">Burocracia</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="btn-icon" onclick="showNotif('📅 Sesión de hoy pendiente','Anatomía del ojo — Fase 1: Repaso. ¡Tienes 45 min planificados!')" title="Notificaciones">🔔</button>
+      <button class="btn btn-sm btn-ghost" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Principal</div>
+        <div class="sidebar-item active" id="nav-dashboard" onclick="showSection('dashboard')">
+          <span class="sidebar-icon">🏠</span> Dashboard
+        </div>
+        <div class="sidebar-item" id="nav-cursos" onclick="showSection('cursos')">
+          <span class="sidebar-icon">📚</span> Mis cursos
+        </div>
+        <div class="sidebar-item" id="nav-sesion" onclick="showSection('sesion')">
+          <span class="sidebar-icon">▶️</span> Sesión de hoy
+        </div>
+        <div class="sidebar-item" id="nav-calendario" onclick="showSection('calendario')">
+          <span class="sidebar-icon">📅</span> Calendario
+        </div>
+      </div>
+      <div class="sidebar-section" style="margin-top:8px;">
+        <div class="sidebar-label">Progreso</div>
+        <div class="sidebar-item" id="nav-informe" onclick="showSection('informe')">
+          <span class="sidebar-icon">📊</span> Informe semanal
+        </div>
+        <div class="sidebar-item" id="nav-burocracia" onclick="showSection('burocracia')">
+          <span class="sidebar-icon">📋</span> Burocracia
+        </div>
+        <div class="sidebar-item" id="nav-plan" onclick="showSection('plan')">
+          <span class="sidebar-icon">🗺️</span> Plan de estudio
+        </div>
+      </div>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-user">
+        <div class="avatar">MA</div>
+        <div>
+          <div class="user-name">María A.</div>
+          <div class="user-role">MIR + OIR 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="main">
+
+      <!-- API KEY BANNER -->
+      <div id="api-banner-app" class="api-banner" style="display:none;">
+        <span class="api-banner-icon">🔑</span>
+        <span class="api-banner-text">Añade tu API key de Anthropic para activar la IA:</span>
+        <input id="api-key-input-app" class="api-key-input" type="password" placeholder="sk-ant-...">
+        <button class="api-save-btn" onclick="saveApiKey()">Guardar</button>
+      </div>
+
+      <!-- ══ SECTION: DASHBOARD ══ -->
+      <div id="section-dashboard" class="section">
+        <div class="section-heading">
+          <div class="section-eyebrow">Bienvenida de vuelta</div>
+          <div class="section-title">Buenas tardes, María 👋</div>
+          <div class="section-sub">Llevas 12 días de racha. No la rompas hoy.</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-label">Racha actual</div>
+            <div class="stat-value">12</div>
+            <div class="stat-sub">días consecutivos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📖</div>
+            <div class="stat-label">Temas completados</div>
+            <div class="stat-value">18<span style="font-size:16px;color:var(--text3)">/64</span></div>
+            <div class="stat-sub">28% del temario</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-label">Precisión últimos exam.</div>
+            <div class="stat-value">74<span style="font-size:16px;color:var(--text3)">%</span></div>
+            <div class="stat-sub">↑ +6% esta semana</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-label">Horas esta semana</div>
+            <div class="stat-value">9.5</div>
+            <div class="stat-sub">meta: 12h / semana</div>
+          </div>
+        </div>
+
+        <!-- Sesión de hoy -->
+        <div style="background:linear-gradient(135deg,rgba(74,222,128,.08),rgba(96,165,250,.06));border:1px solid var(--accent);border-radius:var(--r);padding:24px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Sesión de hoy</div>
+              <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;">Anatomía ocular — Segmento anterior</div>
+              <div style="font-size:13px;color:var(--text2);">Córnea, cristalino, cámara anterior · 5 fases · ~45 min</div>
+            </div>
+            <button class="btn btn-primary" onclick="showSection('sesion')">▶ Empezar sesión</button>
+          </div>
+          <div style="margin-top:16px;">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-bottom:5px;">
+              <span>Progreso del tema</span><span>Fase 1 de 5</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Próximas sesiones -->
+          <div class="card">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">Próximas sesiones</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg3);border-radius:var(--r2);">
+                <span style="font-size:18px;">📅</span>
+                <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);">Glaucoma — Intro y epidemiología</div><div style="font-size:11px;color:var(--text3);">Mañana · 45 min</div></div>
+                <span class="badge badge-blue">Plan</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg3);border-radius:var(--r2);">
+                <span style="font-size:18px;">📅</span>
+                <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);">Retina — Anatomía y vascularización</div><div style="font-size:11px;color:var(--text3);">Jue · 60 min</div></div>
+                <span class="badge badge-blue">Plan</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--bg3);border-radius:var(--r2);">
+                <span style="font-size:18px;">📅</span>
+                <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);">Refracción — Defectos y corrección</div><div style="font-size:11px;color:var(--text3);">Vie · 45 min</div></div>
+                <span class="badge badge-blue">Plan</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Áreas por reforzar -->
+          <div class="card">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;">Áreas a reforzar</div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Neuro-oftalmología</span><span style="color:var(--coral)">42%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:42%;background:var(--coral)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Órbita y párpados</span><span style="color:var(--amber)">58%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:58%;background:var(--amber)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Tumores oculares</span><span style="color:var(--amber)">61%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:61%;background:var(--amber)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Glaucoma</span><span style="color:var(--accent)">76%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:76%;background:var(--accent)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Segmento anterior</span><span style="color:var(--accent)">82%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:82%;background:var(--accent)"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION: CURSOS ══ -->
+      <div id="section-cursos" class="section" style="display:none;">
+        <div class="section-heading">
+          <div class="section-eyebrow">Formaciones</div>
+          <div class="section-title">Mis cursos</div>
+          <div class="section-sub">Selecciona un curso para empezar o continuar tu preparación</div>
+        </div>
+
+        <div class="grid-3">
+          <div class="course-card" onclick="showSection('sesion')">
+            <div class="course-card-img" style="background:linear-gradient(135deg,rgba(74,222,128,.12),rgba(45,212,191,.08));">👁️</div>
+            <div class="course-card-body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <span class="badge badge-green">En curso</span>
+                <span class="badge badge-amber">OIR 2026</span>
+              </div>
+              <div class="course-card-title">Oposición Oftalmólogo SAS</div>
+              <div class="course-card-meta">64 temas · 320 h estimadas · Andalucía</div>
+              <div class="course-progress-row"><span>28% completado</span><span style="color:var(--accent);font-weight:600;">18/64</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:28%"></div></div>
+            </div>
+          </div>
+
+          <div class="course-card" style="opacity:.7">
+            <div class="course-card-img" style="background:linear-gradient(135deg,rgba(96,165,250,.1),rgba(167,139,250,.08));">🏥</div>
+            <div class="course-card-body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <span class="badge badge-purple">Próximamente</span>
+              </div>
+              <div class="course-card-title">Medicina Interna SAS</div>
+              <div class="course-card-meta">120 temas · 600 h · Andalucía</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:8px;">Disponible en Q2 2025</div>
+            </div>
+          </div>
+
+          <div class="course-card" style="opacity:.7">
+            <div class="course-card-img" style="background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(248,113,113,.08));">🧠</div>
+            <div class="course-card-body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                <span class="badge badge-purple">Próximamente</span>
+              </div>
+              <div class="course-card-title">Neurología SAS</div>
+              <div class="course-card-meta">95 temas · 480 h · Andalucía</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:8px;">Disponible en Q3 2025</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Setup plan si no existe -->
+        <div style="margin-top:28px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r);padding:24px;text-align:center;">
+          <div style="font-size:32px;margin-bottom:12px;">🗓️</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;">¿Aún no has configurado tu plan de estudio?</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Dinos tu disponibilidad y generamos un plan personalizado en segundos</div>
+          <button class="btn btn-primary" onclick="showSection('plan')">Crear mi plan →</button>
+        </div>
+      </div>
+
+      <!-- ══ SECTION: PLAN DE ESTUDIO ONBOARDING ══ -->
+      <div id="section-plan" class="section" style="display:none;">
+        <div class="section-heading">
+          <div class="section-eyebrow">Configuración</div>
+          <div class="section-title">Tu plan de estudio</div>
+          <div class="section-sub">Personalizado para OIR 2026 · Andalucía</div>
+        </div>
+
+        <div class="onboarding-steps">
+          <div class="ob-step done"><div class="ob-step-num">✓</div><div class="ob-step-label">Objetivos</div></div>
+          <div class="ob-connector"></div>
+          <div class="ob-step active"><div class="ob-step-num">2</div><div class="ob-step-label">Disponibilidad</div></div>
+          <div class="ob-connector"></div>
+          <div class="ob-step pending"><div class="ob-step-num">3</div><div class="ob-step-label">Plan generado</div></div>
+          <div class="ob-connector"></div>
+          <div class="ob-step pending"><div class="ob-step-num">4</div><div class="ob-step-label">Exportar</div></div>
+        </div>
+
+        <div class="card" style="max-width:560px;">
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:20px;">¿Cuándo y cuánto puedes estudiar?</div>
+
+          <div class="form-group">
+            <label>Fecha del examen objetivo</label>
+            <input class="input" type="date" value="2026-06-14" id="plan-fecha">
+          </div>
+
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;">Días disponibles</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;" id="dias-selector">
+            <button class="btn btn-sm btn-secondary dia-btn active" data-dia="L">L</button>
+            <button class="btn btn-sm btn-secondary dia-btn" data-dia="M">M</button>
+            <button class="btn btn-sm btn-secondary dia-btn active" data-dia="X">X</button>
+            <button class="btn btn-sm btn-secondary dia-btn" data-dia="J">J</button>
+            <button class="btn btn-sm btn-secondary dia-btn active" data-dia="V">V</button>
+            <button class="btn btn-sm btn-secondary dia-btn" data-dia="S">S</button>
+            <button class="btn btn-sm btn-secondary dia-btn" data-dia="D">D</button>
+          </div>
+
+          <div class="grid-2" style="gap:12px;margin-bottom:20px;">
+            <div class="form-group" style="margin-bottom:0">
+              <label>Horas por sesión</label>
+              <select class="input" id="plan-horas">
+                <option value="1">1 hora</option>
+                <option value="1.5">1.5 horas</option>
+                <option value="2" selected>2 horas</option>
+                <option value="3">3 horas</option>
+                <option value="4">4 horas</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label>Intensidad</label>
+              <select class="input" id="plan-intens">
+                <option value="ligera">Ligera — ritmo cómodo</option>
+                <option value="media" selected>Media — equilibrada</option>
+                <option value="intensa">Intensa — máximo</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="generarPlan()" id="btn-generar-plan">Generar mi plan de estudio →</button>
+        </div>
+
+        <!-- Plan generado (oculto hasta generar) -->
+        <div id="plan-generado" style="display:none;margin-top:24px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div>
+              <div style="font-size:16px;font-weight:700;color:var(--text);">Plan OIR 2026 generado ✓</div>
+              <div style="font-size:13px;color:var(--text2);">156 sesiones · 312 horas · 22 semanas restantes</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-sm btn-secondary" onclick="exportCalendar('google')">📅 Google Calendar</button>
+              <button class="btn btn-sm btn-secondary" onclick="exportCalendar('apple')">🍎 Apple Calendar</button>
+            </div>
+          </div>
+          <div id="plan-table-content"></div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION: SESIÓN DE ESTUDIO ══ -->
+      <div id="section-sesion" class="section" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div>
+            <div class="section-eyebrow">Sesión activa</div>
+            <div class="section-title" style="font-size:20px;">Anatomía ocular — Segmento anterior</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="font-size:13px;color:var(--text2);">⏱️ <span id="session-timer">00:00</span></div>
+            <button class="btn btn-sm btn-secondary" onclick="showSection('dashboard')">✕ Salir</button>
+          </div>
+        </div>
+
+        <!-- Phase tabs -->
+        <div class="phase-tabs">
+          <div class="phase-tab active" id="tab-1" onclick="showPhase(1)">
+            <span class="phase-icon">🔁</span>
+            <span class="phase-num">Fase 1</span>
+            <span class="phase-name">Repaso</span>
+          </div>
+          <div class="phase-tab" id="tab-2" onclick="showPhase(2)">
+            <span class="phase-icon">💡</span>
+            <span class="phase-num">Fase 2</span>
+            <span class="phase-name">Conceptos</span>
+          </div>
+          <div class="phase-tab" id="tab-3" onclick="showPhase(3)">
+            <span class="phase-icon">🗺️</span>
+            <span class="phase-num">Fase 3</span>
+            <span class="phase-name">Mapa mental</span>
+          </div>
+          <div class="phase-tab" id="tab-4" onclick="showPhase(4)">
+            <span class="phase-icon">📄</span>
+            <span class="phase-num">Fase 4</span>
+            <span class="phase-name">Lectura</span>
+          </div>
+          <div class="phase-tab" id="tab-5" onclick="showPhase(5)">
+            <span class="phase-icon">📝</span>
+            <span class="phase-num">Fase 5</span>
+            <span class="phase-name">Examen</span>
+          </div>
+        </div>
+
+        <div class="phase-content" id="phase-content-area">
+          <!-- Content injected by JS -->
+        </div>
+      </div>
+
+      <!-- ══ SECTION: CALENDARIO ══ -->
+      <div id="section-calendario" class="section" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div class="section-eyebrow">Planificación</div>
+            <div class="section-title">Calendario de estudio</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-secondary" onclick="exportCalendar('google')">📅 Google Cal</button>
+            <button class="btn btn-sm btn-secondary" onclick="exportCalendar('apple')">🍎 Apple Cal</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div style="font-size:16px;font-weight:700;color:var(--text);" id="cal-month-label">Junio 2025</div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn-icon" onclick="navMonth(-1)">‹</button>
+              <button class="btn-icon" onclick="navMonth(1)">›</button>
+            </div>
+          </div>
+          <div class="calendar-grid" id="cal-grid"></div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></div>Sesión planificada</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue)"></div>Completada</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);"><div style="width:8px;height:8px;border-radius:50%;background:var(--coral)"></div>Sesión perdida</div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION: INFORME SEMANAL ══ -->
+      <div id="section-informe" class="section" style="display:none;">
+        <div class="section-heading">
+          <div class="section-eyebrow">Semana del 16 – 22 junio</div>
+          <div class="section-title">Tu informe semanal</div>
+          <div class="section-sub">Generado automáticamente · Siguiente en 5 días</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-icon">📖</div><div class="stat-label">Sesiones completadas</div><div class="stat-value">4<span style="font-size:16px;color:var(--text3)">/5</span></div><div class="stat-sub">1 sesión perdida</div></div>
+          <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-label">Horas de estudio</div><div class="stat-value">9.5</div><div class="stat-sub">objetivo: 12h</div></div>
+          <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-label">Media exámenes</div><div class="stat-value">74<span style="font-size:16px;color:var(--text3)">%</span></div><div class="stat-sub">↑ mejora vs. sem. ant.</div></div>
+          <div class="stat-card"><div class="stat-icon">💪</div><div class="stat-label">Temas nuevos</div><div class="stat-value">4</div><div class="stat-sub">Córnea, cristalino, uvea, retina</div></div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;">Dominio por bloque</div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Segmento anterior</span><span style="color:var(--accent)">82%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:82%;background:var(--accent)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Glaucoma</span><span style="color:var(--accent)">76%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:76%;background:var(--accent)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Retina</span><span style="color:var(--blue)">69%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:69%;background:var(--blue)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Órbita y párpados</span><span style="color:var(--amber)">58%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:58%;background:var(--amber)"></div></div></div>
+            <div class="topic-bar"><div class="topic-bar-label"><span>Neuro-oftalmología</span><span style="color:var(--coral)">42%</span></div><div class="topic-bar-track"><div class="topic-bar-fill" style="width:42%;background:var(--coral)"></div></div></div>
+          </div>
+
+          <div class="card">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;">Análisis IA — Áreas de mejora</div>
+            <div id="ai-weekly-analysis">
+              <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="generateWeeklyAnalysis()">🤖 Generar análisis con IA</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Plan ajustado para la próxima semana</div>
+            <span class="badge badge-amber">⚡ Auto-reorganizado</span>
+          </div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">Basado en tus resultados, hemos añadido 1 sesión de repaso en neuro-oftalmología y reorganizado la sesión perdida al sábado.</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:var(--r2);">
+              <span style="color:var(--accent);font-size:18px;">📅</span>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;">Lun — Neuro-oftalmología (refuerzo)</div><div style="font-size:11px;color:var(--text3);">Añadida por bajo dominio · 45 min</div></div>
+              <span class="badge badge-coral">Refuerzo</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:var(--r2);">
+              <span style="color:var(--blue);font-size:18px;">📅</span>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;">Mar — Glaucoma avanzado</div><div style="font-size:11px;color:var(--text3);">Sesión planificada original · 60 min</div></div>
+              <span class="badge badge-blue">Plan</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg3);border-radius:var(--r2);">
+              <span style="color:var(--amber);font-size:18px;">📅</span>
+              <div style="flex:1"><div style="font-size:13px;font-weight:500;">Sáb — Sesión recuperada · Retina</div><div style="font-size:11px;color:var(--text3);">Sesión perdida del miércoles · 60 min</div></div>
+              <span class="badge badge-amber">Recuperada</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECTION: BUROCRACIA ══ -->
+      <div id="section-burocracia" class="section" style="display:none;">
+        <div class="section-heading">
+          <div class="section-eyebrow">Información oficial</div>
+          <div class="section-title">Burocracia · OIR Andalucía 2026</div>
+          <div class="section-sub">Actualizado con la última convocatoria del BOE · SAS</div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:24px;">
+          <div class="card" style="background:var(--accent-dim);border-color:var(--accent);">
+            <div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px;">📋 Convocatoria activa</div>
+            <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">OIR 2026</div>
+            <div style="font-size:13px;color:var(--text2);">Servicio Andaluz de Salud · Categoría Oftalmólogo/a</div>
+          </div>
+          <div class="card">
+            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px;">🏥 Plazas disponibles</div>
+            <div style="font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;">47 plazas</div>
+            <div style="font-size:13px;color:var(--text2);">34 OPE + 13 reserva discapacidad</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;">Timeline del proceso</div>
+            <div class="burocr-timeline">
+              <div class="burocr-item">
+                <div class="burocr-dot done"></div>
+                <div class="burocr-date">Ene 2025</div>
+                <div class="burocr-title">Publicación convocatoria BOE</div>
+                <div class="burocr-desc">BOE núm. 15, de 17 de enero de 2025. Bases de la convocatoria publicadas.</div>
+              </div>
+              <div class="burocr-item">
+                <div class="burocr-dot done"></div>
+                <div class="burocr-date">Feb 2025</div>
+                <div class="burocr-title">Período de inscripción</div>
+                <div class="burocr-desc">Del 1 al 28 de febrero. Solicitud telemática a través de la sede electrónica del SAS.</div>
+              </div>
+              <div class="burocr-item">
+                <div class="burocr-dot next"></div>
+                <div class="burocr-date">Abr 2025</div>
+                <div class="burocr-title">Publicación lista provisional admitidos</div>
+                <div class="burocr-desc">Plazo de 10 días hábiles para subsanar errores o presentar reclamaciones.</div>
+              </div>
+              <div class="burocr-item">
+                <div class="burocr-dot"></div>
+                <div class="burocr-date">Jun 2026</div>
+                <div class="burocr-title">Examen oposición</div>
+                <div class="burocr-desc">Prueba tipo test de 100 preguntas + 5 de reserva. Duración: 2,5 horas.</div>
+              </div>
+              <div class="burocr-item">
+                <div class="burocr-dot"></div>
+                <div class="burocr-date">Sep 2026</div>
+                <div class="burocr-title">Publicación resolución definitiva</div>
+                <div class="burocr-desc">Adjudicación de plazas y destinos.</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card" style="margin-bottom:14px;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;">Requisitos de participación</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:10px;font-size:13px;"><span style="color:var(--accent)">✓</span><span>Título de Licenciado/Graduado en Medicina y Cirugía</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;"><span style="color:var(--accent)">✓</span><span>Especialidad en Oftalmología vía MIR</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;"><span style="color:var(--accent)">✓</span><span>Nacionalidad española o comunitaria</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;"><span style="color:var(--accent)">✓</span><span>No haber sido separado por expediente disciplinario</span></div>
+                <div style="display:flex;gap:10px;font-size:13px;"><span style="color:var(--accent)">✓</span><span>Habilitación funcional para el puesto</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;">Estructura del examen</div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text2);">
+                <div style="display:flex;justify-content:space-between;"><span>Preguntas tipo test</span><span style="color:var(--text);font-weight:600;">100 + 5 reserva</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>Duración</span><span style="color:var(--text);font-weight:600;">2,5 horas</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>Penalización</span><span style="color:var(--text);font-weight:600;">–0,25 por fallo</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>Nota mínima</span><span style="color:var(--text);font-weight:600;">50/100</span></div>
+                <div style="display:flex;justify-content:space-between;"><span>Méritos (2ª fase)</span><span style="color:var(--text);font-weight:600;">Baremo hasta 40 p.</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-layout -->
+</div><!-- /screen-app -->
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- CHATBOT WIDGET (siempre visible en app)        -->
+<!-- ══════════════════════════════════════════════ -->
+<div id="chat-widget" class="chat-widget" style="display:none;">
+  <div class="chat-panel" id="chat-panel">
+    <div class="chat-header">
+      <div class="chat-avatar">🤖</div>
+      <div class="chat-info">
+        <div class="chat-name">Asistente IA</div>
+        <div class="chat-status">● Disponible</div>
+      </div>
+      <button class="btn-icon" onclick="toggleChat()" style="font-size:14px;">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg ai">
+        <div class="msg-dot">🤖</div>
+        <div class="msg-bubble">Hola, María 👋 Soy tu asistente de estudio. Puedo ayudarte con cualquier duda sobre el temario de oftalmología, explicar conceptos, o aclarar preguntas de examen. ¿En qué te ayudo?</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Pregunta sobre el temario..." rows="1" onkeydown="chatKeydown(event)"></textarea>
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()">🤖</button>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+<div id="notif-toast" style="display:none;" class="notif-toast">
+  <div class="notif-icon" id="notif-icon">📅</div>
+  <div><div class="notif-title" id="notif-title"></div><div class="notif-desc" id="notif-desc"></div></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let apiKey = '';
+let currentPhase = 1;
+let sessionTimerInterval = null;
+let sessionSeconds = 0;
+let calMonthOffset = 0;
+let chatPanelOpen = false;
+let chatHistory = [];
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function doLogin() {
+  const key = document.getElementById('api-key-input-login').value.trim();
+  if (key.startsWith('sk-ant-')) {
+    apiKey = key;
+    localStorage.setItem('opto_api_key', key);
+  }
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').classList.add('active');
+  document.getElementById('chat-widget').style.display = 'block';
+  if (!apiKey) {
+    const saved = localStorage.getItem('opto_api_key');
+    if (saved) { apiKey = saved; }
+    else {
+      document.getElementById('api-banner-app').style.display = 'flex';
+    }
+  }
+  showSection('dashboard');
+  showNotif('🎉 Bienvenida de vuelta, María', '12 días de racha. ¡Hoy toca Anatomía ocular!');
+}
+
+function saveApiKey() {
+  const k = document.getElementById('api-key-input-app').value.trim();
+  if (k.startsWith('sk-ant-')) {
+    apiKey = k;
+    localStorage.setItem('opto_api_key', k);
+    document.getElementById('api-banner-app').style.display = 'none';
+    showNotif('🔑 API key guardada', 'La IA está ahora activa en toda la plataforma.');
+  }
+}
+
+function doLogout() {
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('chat-widget').style.display = 'none';
+  stopSessionTimer();
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+
+  const el = document.getElementById('section-' + id);
+  if (el) el.style.display = 'block';
+
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+
+  if (id === 'sesion') { startSessionTimer(); renderPhase(currentPhase); }
+  else { stopSessionTimer(); }
+  if (id === 'calendario') renderCalendar();
+  if (id === 'plan') renderPlanPreview();
+
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════
+// SESSION TIMER
+// ══════════════════════════════════════════════
+function startSessionTimer() {
+  if (sessionTimerInterval) return;
+  sessionTimerInterval = setInterval(() => {
+    sessionSeconds++;
+    const m = Math.floor(sessionSeconds/60).toString().padStart(2,'0');
+    const s = (sessionSeconds%60).toString().padStart(2,'0');
+    const el = document.getElementById('session-timer');
+    if (el) el.textContent = m+':'+s;
+  }, 1000);
+}
+function stopSessionTimer() {
+  clearInterval(sessionTimerInterval);
+  sessionTimerInterval = null;
+}
+
+// ══════════════════════════════════════════════
+// PHASES
+// ══════════════════════════════════════════════
+function showPhase(n) {
+  currentPhase = n;
+  document.querySelectorAll('.phase-tab').forEach((t,i) => {
+    t.classList.remove('active','done');
+    if (i+1 < n) t.classList.add('done');
+    if (i+1 === n) t.classList.add('active');
+  });
+  renderPhase(n);
+}
+
+function renderPhase(n) {
+  const area = document.getElementById('phase-content-area');
+  const renderers = [null, renderPhase1, renderPhase2, renderPhase3, renderPhase4, renderPhase5];
+  if (renderers[n]) renderers[n](area);
+}
+
+// PHASE 1 — REPASO CON FLASHCARDS
+let fcIdx = 0;
+const flashcards = [
+  {q:'¿Cuáles son las 5 capas de la córnea?', a:'Epitelio, Bowman, Estroma (90%), Descemet, Endotelio'},
+  {q:'¿Qué célula es responsable del transporte de fluido en el endotelio corneal?', a:'Las células endoteliales con bomba Na⁺/K⁺ ATPasa (no se regeneran en adultos)'},
+  {q:'¿Cuál es el índice de refracción de la córnea?', a:'1.376 — aporta ~43 dioptrías (70% del poder refractivo total del ojo)'},
+  {q:'¿Qué aporta el cristalino?', a:'~20 dioptrías. Permite la acomodación gracias al músculo ciliar y zonulas de Zinn'},
+];
+
+function renderPhase1(area) {
+  const fc = flashcards[fcIdx % flashcards.length];
+  area.innerHTML = `
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);">🔁 Repaso — Sesión anterior</div>
+          <div style="font-size:13px;color:var(--text2);">Tarjeta ${(fcIdx%flashcards.length)+1} de ${flashcards.length} · Haz clic en la tarjeta para ver la respuesta</div>
+        </div>
+        <span class="badge badge-teal">Segmento anterior</span>
+      </div>
+      <div class="flashcard-wrapper">
+        <div class="flashcard" id="fc-card" onclick="flipCard()">
+          <div class="flashcard-front">
+            <div class="fc-label">Pregunta</div>
+            <div class="fc-text">${fc.q}</div>
+            <div class="fc-hint">Toca para ver respuesta</div>
+          </div>
+          <div class="flashcard-back">
+            <div class="fc-label">Respuesta</div>
+            <div class="fc-text">${fc.a}</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:20px;">
+        <button class="btn btn-secondary btn-sm" onclick="fcRate('again')">🔁 Repetir</button>
+        <button class="btn btn-secondary btn-sm" onclick="fcRate('hard')">😓 Difícil</button>
+        <button class="btn btn-secondary btn-sm" onclick="fcRate('ok')">👍 Bien</button>
+        <button class="btn btn-primary btn-sm" onclick="fcRate('easy')">⚡ Fácil</button>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:20px;">
+      <button class="btn btn-primary" onclick="showPhase(2)">Siguiente fase → Conceptos clave</button>
+    </div>
+  `;
+}
+
+function flipCard() {
+  document.getElementById('fc-card').classList.toggle('flipped');
+}
+function fcRate(rating) {
+  fcIdx++;
+  const card = document.getElementById('fc-card');
+  if (card) card.classList.remove('flipped');
+  const fc = flashcards[fcIdx % flashcards.length];
+  const front = card?.querySelector('.flashcard-front .fc-text');
+  const back = card?.querySelector('.flashcard-back .fc-text');
+  if (front) front.textContent = fc.q;
+  if (back) back.textContent = fc.a;
+  const label = document.querySelector('.phase-content .fc-label');
+  const counter = document.querySelector('.phase-content .section-sub, .phase-content > div > div > div:nth-child(2)');
+  showNotif('📊 Registrado', `Respuesta: ${rating}. SRS actualizado.`);
+}
+
+// PHASE 2 — CONCEPTOS CLAVE
+function renderPhase2(area) {
+  const concepts = [
+    {icon:'🔬', title:'Córnea — 5 capas', desc:'Epitelio (regenerativo) → Bowman (protectora) → Estroma (90% espesor) → Descemet (membrana basal del endotelio) → Endotelio (bomba Na⁺/K⁺, no regenera)'},
+    {icon:'🎯', title:'Cristalino — acomodación', desc:'20 D de poder refractivo. El músculo ciliar se contrae → relajación de zónulas → cristalino más esférico → mayor poder. Presbicia = pérdida elasticidad (~45 años)'},
+    {icon:'💧', title:'Humor acuoso — producción y drenaje', desc:'Producido por epitelio del cuerpo ciliar. Drena por trabéculo + canal de Schlemm (90%) y vía uveoescleral (10%). Fórmula PIO normal: 10–21 mmHg'},
+    {icon:'📐', title:'Ángulo de la cámara anterior', desc:'Línea de Schwalbe → trabéculo → espolón escleral → banda ciliar → raíz del iris. Clasificación Shaffer (IV-0). Gonioscopia fundamental para glaucoma'},
+  ];
+  area.innerHTML = `
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);">💡 Conceptos clave de hoy</div>
+        <div style="font-size:13px;color:var(--text2);">4 conceptos esenciales · Anatomía ocular · Segmento anterior</div>
+      </div>
+      <span class="badge badge-blue">4 conceptos</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+      ${concepts.map((c,i) => `
+        <div style="display:flex;gap:14px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);">
+          <span style="font-size:24px;flex-shrink:0;">${c.icon}</span>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">${c.title}</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6;">${c.desc}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="text-align:right;">
+      <button class="btn btn-primary" onclick="showPhase(3)">Siguiente → Mapa mental</button>
+    </div>
+  `;
+}
+
+// PHASE 3 — MAPA CONCEPTUAL
+function renderPhase3(area) {
+  area.innerHTML = `
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);">🗺️ Mapa conceptual — Segmento anterior</div>
+        <div style="font-size:13px;color:var(--text2);">Estructura visual del tema de hoy</div>
+      </div>
+    </div>
+    <div style="position:relative;padding:20px 0;overflow:auto;">
+      <!-- Nodo central -->
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <div class="concept-node central">Segmento Anterior</div>
+      </div>
+      <!-- Nivel 2 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="concept-node secondary">Córnea</div>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">5 capas</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Avascular</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">43 D</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="concept-node secondary">Cristalino</div>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Acomodación</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Zónulas</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">20 D</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="concept-node secondary">C. anterior</div>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Humor acuoso</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Ángulo filtrante</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">PIO 10-21</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <div class="concept-node secondary">Iris / Cuerpo ciliar</div>
+          <div style="display:flex;flex-direction:column;gap:4px;width:100%;">
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Pupila</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Prod. humor acuoso</div>
+            <div class="concept-node tertiary" style="width:100%;text-align:center;">Músculo ciliar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right;margin-top:20px;">
+      <button class="btn btn-primary" onclick="showPhase(4)">Siguiente → Lectura con tarjetas</button>
+    </div>
+  `;
+}
+
+// PHASE 4 — LECTURA CON TARJETAS
+let readingCardIdx = 0;
+const readingCards = [
+  {tag:'Córnea', titulo:'Estructura y función', contenido:'La córnea es el tejido transparente avascular que constituye el tercio anterior del globo ocular. Su curvatura anterior tiene un radio de 7,8 mm y posterior de 6,5 mm. Con un índice de refracción de 1,376, aporta aproximadamente 43 dioptrías del poder refractivo total del ojo (unos 60 D en total). La nutrición corneal procede del humor acuoso (endotelio), la película lagrimal (epitelio) y los vasos límbicos (estroma periférico). La inervación sensitiva, muy rica, proviene del nervio nasociliar (V par).', idea:'La córnea aporta el 70% del poder refractivo total del ojo y es avascular — se nutre del humor acuoso y la lágrima.'},
+  {tag:'Cristalino', titulo:'Acomodación y presbicia', contenido:'El cristalino es una lente biconvexa, avascular y carente de inervación, suspendida por las fibras zonulares de Zinn del cuerpo ciliar. Su poder varía entre 18-25 dioptrías según el estado de acomodación. Durante la acomodación, el músculo ciliar se contrae → las fibras zonulares se relajan → el cristalino adquiere mayor curvatura (más esférico) → mayor poder refractivo. Este mecanismo permite enfocar objetos cercanos. La presbicia aparece hacia los 45 años por pérdida de elasticidad del cristalino, incapacitando la acomodación para objetos próximos.', idea:'La acomodación: músculo ciliar se contrae → zónulas se relajan → cristalino más esférico → más potencia. La presbicia es la pérdida de este mecanismo.'},
+  {tag:'Humor acuoso', titulo:'Producción, circulación y drenaje', contenido:'El humor acuoso es producido por el epitelio del cuerpo ciliar mediante secreción activa (70-80%) y ultrafiltración (20-30%). Circula desde la cámara posterior, a través de la pupila, hasta la cámara anterior. Su drenaje se produce principalmente (90%) por la vía trabecular: malla trabecular → canal de Schlemm → venas epiesclerales. El 10% restante drena por la vía uveoescleral. La PIO normal oscila entre 10-21 mmHg. Un desequilibrio entre producción y drenaje produce hipertensión ocular, factor de riesgo principal del glaucoma.', idea:'Producido en cuerpo ciliar → pupila → ángulo → trabéculo → Schlemm. PIO normal: 10-21 mmHg. Desequilibrio → glaucoma.'},
+];
+
+function renderPhase4(area) {
+  const rc = readingCards[readingCardIdx % readingCards.length];
+  area.innerHTML = `
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);">📄 Lectura con tarjetas de ideas clave</div>
+        <div style="font-size:13px;color:var(--text2);">Texto ${(readingCardIdx%readingCards.length)+1} de ${readingCards.length}</div>
+      </div>
+      <span class="badge badge-blue">${rc.tag}</span>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:20px;margin-bottom:16px;">
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px;">${rc.titulo}</div>
+      <div style="font-size:14px;color:var(--text2);line-height:1.8;">${rc.contenido}</div>
+    </div>
+    <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:var(--r2);padding:16px;display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;">
+      <span style="font-size:20px;flex-shrink:0;">💡</span>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Idea clave</div>
+        <div style="font-size:14px;color:var(--text);font-weight:500;">${rc.idea}</div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <button class="btn btn-secondary btn-sm" onclick="readingCardIdx++;renderPhase(4)">Siguiente texto →</button>
+      <button class="btn btn-primary" onclick="showPhase(5)">Ir al examen →</button>
+    </div>
+  `;
+}
+
+// PHASE 5 — SIMULACRO EXAMEN
+const examQuestions = [
+  {
+    q:'¿Cuántas dioptrías aporta la córnea al sistema óptico del ojo?',
+    opts:['20 dioptrías','43 dioptrías','60 dioptrías','30 dioptrías'],
+    correct: 1,
+    exp:'La córnea aporta aproximadamente 43 D, que representa el 70% del poder refractivo total del ojo (~60 D).'
+  },
+  {
+    q:'En la acomodación, ¿qué ocurre con las fibras zonulares cuando el músculo ciliar se contrae?',
+    opts:['Se tensan → cristalino se aplana','Se relajan → cristalino se hace más esférico','Se rompen → pérdida de acomodación','No se modifican — la acomodación es independiente'],
+    correct: 1,
+    exp:'Al contraerse el músculo ciliar, las fibras zonulares se relajan, permitiendo que el cristalino adquiera su forma más esférica y aumente su poder refractivo.'
+  },
+  {
+    q:'La presión intraocular normal se sitúa entre:',
+    opts:['5-10 mmHg','10-21 mmHg','21-30 mmHg','0-5 mmHg'],
+    correct: 1,
+    exp:'La PIO normal es 10-21 mmHg. Valores >21 mmHg se consideran hipertensión ocular, factor de riesgo para glaucoma.'
+  },
+];
+let examAnswers = {};
+let examSubmitted = false;
+
+function renderPhase5(area) {
+  examAnswers = {};
+  examSubmitted = false;
+  area.innerHTML = `
+    <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);">📝 Simulacro de examen</div>
+        <div style="font-size:13px;color:var(--text2);">${examQuestions.length} preguntas tipo OIR · Sin chatbot disponible</div>
+      </div>
+      <span class="badge badge-coral">⚠️ Sin asistente</span>
+    </div>
+    <div id="exam-questions">
+      ${examQuestions.map((q,qi) => `
+        <div class="exam-question" id="eq-${qi}">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <span style="background:var(--bg3);border:1px solid var(--border);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;">${qi+1}</span>
+            <div class="exam-q-text">${q.q}</div>
+          </div>
+          <div class="exam-options">
+            ${q.opts.map((o,oi) => `
+              <div class="exam-option" id="opt-${qi}-${oi}" onclick="selectOption(${qi},${oi})">
+                <div class="exam-option-letter">${'ABCD'[oi]}</div>
+                <span>${o}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div id="exp-${qi}" style="display:none;margin-top:10px;padding:12px;background:var(--bg3);border-left:3px solid var(--accent);border-radius:0 var(--r2) var(--r2) 0;font-size:13px;color:var(--text2);"></div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="text-align:right;margin-top:20px;">
+      <button class="btn btn-primary" id="btn-submit-exam" onclick="submitExam()">Enviar respuestas →</button>
+    </div>
+    <div id="exam-result" style="display:none;"></div>
+  `;
+}
+
+function selectOption(qi, oi) {
+  if (examSubmitted) return;
+  examAnswers[qi] = oi;
+  document.querySelectorAll(`[id^="opt-${qi}-"]`).forEach(el => el.classList.remove('selected'));
+  document.getElementById(`opt-${qi}-${oi}`).classList.add('selected');
+}
+
+function submitExam() {
+  examSubmitted = true;
+  let correct = 0;
+  examQuestions.forEach((q, qi) => {
+    const userAns = examAnswers[qi];
+    for (let oi=0; oi<q.opts.length; oi++) {
+      const el = document.getElementById(`opt-${qi}-${oi}`);
+      if (oi === q.correct) el.classList.add('correct');
+      else if (oi === userAns && userAns !== q.correct) el.classList.add('wrong');
+    }
+    const expEl = document.getElementById(`exp-${qi}`);
+    expEl.style.display = 'block';
+    expEl.textContent = '💡 ' + q.exp;
+    if (userAns === q.correct) correct++;
+  });
+  document.getElementById('btn-submit-exam').style.display = 'none';
+  const pct = Math.round(correct/examQuestions.length*100);
+  const color = pct>=70 ? 'var(--accent)' : pct>=50 ? 'var(--amber)' : 'var(--coral)';
+  document.getElementById('exam-result').innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center;margin-top:16px;">
+      <div style="font-size:40px;font-weight:800;font-family:var(--font-display);color:${color};">${pct}%</div>
+      <div style="font-size:15px;font-weight:600;color:var(--text);margin:6px 0;">${correct}/${examQuestions.length} correctas</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">${pct>=70?'¡Buen resultado! El tema está bien asentado.':pct>=50?'Pasable. Revisa los conceptos señalados.':'Necesitas reforzar este tema antes de seguir.'}</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="showSection('dashboard')">← Volver al dashboard</button>
+        <button class="btn btn-primary btn-sm" onclick="showSection('informe')">Ver informe semanal →</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('exam-result').style.display = 'block';
+}
+
+// ══════════════════════════════════════════════
+// CHATBOT
+// ══════════════════════════════════════════════
+function toggleChat() {
+  chatPanelOpen = !chatPanelOpen;
+  const panel = document.getElementById('chat-panel');
+  const toggle = document.querySelector('.chat-toggle');
+  panel.classList.toggle('open', chatPanelOpen);
+  toggle.textContent = chatPanelOpen ? '✕' : '🤖';
+}
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  // Block in exam phase
+  if (currentPhase === 5 && document.getElementById('section-sesion')?.style.display !== 'none') {
+    addChatMsg('ai', '🚫 El asistente está desactivado durante el simulacro de examen. ¡Confía en lo que has aprendido!');
+    return;
+  }
+
+  addChatMsg('user', msg);
+  chatHistory.push({role:'user', content: msg});
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  const messagesEl = document.getElementById('chat-messages');
+  messagesEl.innerHTML += `<div id="${typingId}" class="msg ai"><div class="msg-dot">🤖</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  if (!apiKey) {
+    setTimeout(() => {
+      document.getElementById(typingId)?.remove();
+      const demos = [
+        'La córnea tiene 5 capas: epitelio, Bowman, estroma (90%), Descemet y endotelio. El endotelio es clave porque bombea agua al estroma para mantener la transparencia, y no se regenera en adultos.',
+        'El glaucoma de ángulo abierto primario es la causa más frecuente de ceguera irreversible en el mundo. La presión intraocular elevada (>21 mmHg) es el principal factor de riesgo modificable.',
+        'La acomodación funciona así: músculo ciliar se contrae → zónulas se relajan → cristalino se vuelve más esférico → mayor potencia refractiva para ver de cerca. La presbicia rompe este mecanismo por pérdida de elasticidad del cristalino.',
+        'Para el OIR 2026 de Andalucía son especialmente relevantes: glaucoma, patología corneal, retina médica y quirúrgica, y neuro-oftalmología. Los exámenes históricos muestran un 30% de preguntas de retina.',
+      ];
+      addChatMsg('ai', demos[Math.floor(Math.random()*demos.length)] + '\n\n*(Añade tu API key de Anthropic para respuestas reales sobre el temario)*');
+      chatHistory.push({role:'assistant', content:demos[0]});
+    }, 1400);
+    return;
+  }
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:`Eres el asistente de estudio de OptoAcademia, una plataforma de preparación de oposiciones de oftalmología del SAS (Servicio Andaluz de Salud) para el OIR 2026. Tienes amplio conocimiento de oftalmología clínica, anatomía ocular, patologías, tratamientos y el formato del examen OIR. Responde de forma concisa, clara y didáctica. Cuando sea relevante, menciona si el tema es frecuente en los exámenes OIR históricos. Usa formato legible con puntos clave cuando sea útil. No uses markdown excesivo. Responde en español.`,
+        messages: chatHistory.slice(-10)
+      })
+    });
+    const data = await resp.json();
+    document.getElementById(typingId)?.remove();
+    const answer = data.content?.[0]?.text || 'Error al procesar respuesta.';
+    addChatMsg('ai', answer);
+    chatHistory.push({role:'assistant', content: answer});
+  } catch(e) {
+    document.getElementById(typingId)?.remove();
+    addChatMsg('ai', 'Error de conexión. Revisa tu API key.');
+  }
+}
+
+function addChatMsg(role, text) {
+  const messagesEl = document.getElementById('chat-messages');
+  const formattedText = text.replace(/\n/g, '<br>');
+  const html = role === 'user'
+    ? `<div class="msg user"><div class="msg-dot">🙋</div><div class="msg-bubble">${formattedText}</div></div>`
+    : `<div class="msg ai"><div class="msg-dot">🤖</div><div class="msg-bubble">${formattedText}</div></div>`;
+  messagesEl.innerHTML += html;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// ══════════════════════════════════════════════
+// CALENDAR
+// ══════════════════════════════════════════════
+function renderCalendar() {
+  const now = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() + calMonthOffset, 1);
+  const label = target.toLocaleString('es',{month:'long',year:'numeric'});
+  document.getElementById('cal-month-label').textContent = label.charAt(0).toUpperCase() + label.slice(1);
+
+  const firstDay = new Date(target.getFullYear(), target.getMonth(), 1).getDay();
+  const offset = (firstDay + 6) % 7; // Monday start
+  const daysInMonth = new Date(target.getFullYear(), target.getMonth()+1, 0).getDate();
+
+  // Session days (sample data)
+  const sessionDays = [2,5,7,9,12,14,16,19,21,23,26,28];
+  const doneDays = [2,5,7,9,12];
+  const missedDays = [14];
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  ['L','M','X','J','V','S','D'].forEach(d => {
+    const cell = document.createElement('div');
+    cell.className = 'cal-header-cell';
+    cell.textContent = d;
+    grid.appendChild(cell);
+  });
+
+  for (let i=0; i<offset; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day other-month';
+    grid.appendChild(cell);
+  }
+
+  const today = new Date();
+  for (let d=1; d<=daysInMonth; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+    cell.textContent = d;
+    const isToday = target.getMonth() === today.getMonth() && target.getFullYear() === today.getFullYear() && d === today.getDate() + calMonthOffset*30;
+    if (d === today.getDate() && calMonthOffset === 0) cell.classList.add('today');
+    if (doneDays.includes(d)) cell.classList.add('done-session');
+    else if (missedDays.includes(d)) cell.classList.add('missed-session');
+    else if (sessionDays.includes(d)) cell.classList.add('has-session');
+    cell.onclick = () => showNotif('📅 '+d+' de '+label, sessionDays.includes(d) ? 'Sesión: Anatomía ocular · 45 min' : 'Sin sesión planificada');
+    grid.appendChild(cell);
+  }
+}
+
+function navMonth(dir) {
+  calMonthOffset += dir;
+  renderCalendar();
+}
+
+// ══════════════════════════════════════════════
+// PLAN GENERATOR
+// ══════════════════════════════════════════════
+function generarPlan() {
+  document.getElementById('btn-generar-plan').textContent = 'Generando plan...';
+  document.getElementById('btn-generar-plan').disabled = true;
+
+  setTimeout(() => {
+    document.getElementById('plan-generado').style.display = 'block';
+    document.getElementById('btn-generar-plan').textContent = '✓ Plan generado';
+    renderPlanPreview();
+    showNotif('🗓️ Plan generado','156 sesiones en 22 semanas. Exporta a tu calendario.');
+  }, 1200);
+}
+
+function renderPlanPreview() {
+  const temas = [
+    'Anatomía ocular — Segmento anterior','Anatomía ocular — Segmento posterior',
+    'Glaucoma — Intro y epidemiología','Glaucoma — Diagnóstico y tratamiento',
+    'Retina — Anatomía y vascularización','Refracción — Defectos y corrección',
+    'Córnea — Patología infecciosa','Úvea — Uveítis anterior y posterior',
+    'Neuro-oftalmología — Vía óptica','Órbita y párpados',
+  ];
+  const dias = ['Lun','Mié','Vie','Lun','Mié','Vie','Lun','Mié','Vie','Lun'];
+  const fechas = ['23 jun','25 jun','27 jun','30 jun','2 jul','4 jul','7 jul','9 jul','11 jul','14 jul'];
+  const durs = ['45 min','45 min','60 min','60 min','60 min','45 min','45 min','60 min','60 min','45 min'];
+
+  const html = `
+    <div class="plan-week">
+      <div class="plan-week-title">Semana 1 — 23 al 27 junio</div>
+      ${temas.slice(0,3).map((t,i) => `
+        <div class="plan-day-row">
+          <div class="plan-day-name">${dias[i]}</div>
+          <div class="plan-day-date">${fechas[i]}</div>
+          <div class="plan-day-tema">${t}</div>
+          <div class="plan-day-dur">${durs[i]}</div>
+          <div class="plan-day-status">${i===0?'✅':i===1?'✅':'📅'}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="plan-week">
+      <div class="plan-week-title">Semana 2 — 30 jun al 4 jul</div>
+      ${temas.slice(3,6).map((t,i) => `
+        <div class="plan-day-row">
+          <div class="plan-day-name">${dias[i+3]}</div>
+          <div class="plan-day-date">${fechas[i+3]}</div>
+          <div class="plan-day-tema">${t}</div>
+          <div class="plan-day-dur">${durs[i+3]}</div>
+          <div class="plan-day-status">📅</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="plan-week">
+      <div class="plan-week-title">Semana 3 — 7 al 11 jul</div>
+      ${temas.slice(6,9).map((t,i) => `
+        <div class="plan-day-row">
+          <div class="plan-day-name">${dias[i+6]}</div>
+          <div class="plan-day-date">${fechas[i+6]}</div>
+          <div class="plan-day-tema">${t}</div>
+          <div class="plan-day-dur">${durs[i+6]}</div>
+          <div class="plan-day-status">📅</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="text-align:center;padding:12px;font-size:13px;color:var(--text3);">+ 147 sesiones más hasta junio 2026 →</div>
+  `;
+  const el = document.getElementById('plan-table-content');
+  if (el) el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// WEEKLY ANALYSIS (AI)
+// ══════════════════════════════════════════════
+async function generateWeeklyAnalysis() {
+  const el = document.getElementById('ai-weekly-analysis');
+  el.innerHTML = `<div class="ai-loading"><div class="ai-spinner"></div><div class="ai-loading-text">Analizando tu semana con IA…</div></div>`;
+
+  if (!apiKey) {
+    setTimeout(() => {
+      el.innerHTML = `
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;">
+          <div style="margin-bottom:8px;"><strong style="color:var(--coral);">⚠️ Neuro-oftalmología (42%)</strong> — Tu mayor área débil. Prioriza la vía óptica y los defectos campimétricos. Las lesiones quiasmáticas y retroquiasmáticas son frecuentes en el OIR.</div>
+          <div style="margin-bottom:8px;"><strong style="color:var(--amber);">📈 Órbita y párpados (58%)</strong> — Mejorable. Repasa la anatomía orbitaria y las fracturas de blow-out, que aparecen frecuentemente.</div>
+          <div><strong style="color:var(--accent);">✅ Segmento anterior (82%)</strong> — Sólido. Mantén el ritmo con sesiones de repaso cada 2 semanas.</div>
+          <div style="margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r2);font-size:12px;color:var(--text3);">*(Añade API key para análisis personalizado real)*</div>
+        </div>`;
+    }, 1500);
+    return;
+  }
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:500,
+        system:'Eres el sistema de análisis pedagógico de OptoAcademia. Genera análisis concisos y accionables. Responde en español sin markdown extenso.',
+        messages:[{role:'user', content:`Analiza este rendimiento semanal de una opositora al OIR de oftalmología en Andalucía y da recomendaciones específicas y accionables:
+- Neuro-oftalmología: 42% dominio
+- Órbita y párpados: 58%
+- Tumores oculares: 61%
+- Retina: 69%
+- Glaucoma: 76%
+- Segmento anterior: 82%
+- Sesiones completadas: 4/5, precisión exámenes: 74%
+Dame 3 recomendaciones concretas para la próxima semana (máx 120 palabras total).`}]
+      })
+    });
+    const data = await resp.json();
+    el.innerHTML = `<div style="font-size:13px;color:var(--text2);line-height:1.7;">${(data.content?.[0]?.text||'').replace(/\n/g,'<br>')}</div>`;
+  } catch(e) {
+    el.innerHTML = `<div style="font-size:13px;color:var(--coral);">Error al generar análisis.</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════
+// CALENDAR EXPORT
+// ══════════════════════════════════════════════
+function exportCalendar(type) {
+  showNotif(
+    type === 'google' ? '📅 Google Calendar' : '🍎 Apple Calendar',
+    type === 'google' ? 'Se abrirá la integración con Google Calendar (en versión completa).' : 'Se generará un archivo .ics para importar en Apple Calendar.'
+  );
+}
+
+// ══════════════════════════════════════════════
+// PLAN DIAS SELECTOR
+// ══════════════════════════════════════════════
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('dia-btn')) {
+    e.target.classList.toggle('active');
+    if (e.target.classList.contains('active')) {
+      e.target.style.background = 'var(--accent-dim)';
+      e.target.style.borderColor = 'var(--accent)';
+      e.target.style.color = 'var(--accent)';
+    } else {
+      e.target.style.background = '';
+      e.target.style.borderColor = '';
+      e.target.style.color = '';
+    }
+  }
+});
+
+// ══════════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════════
+function showNotif(title, desc) {
+  const toast = document.getElementById('notif-toast');
+  document.getElementById('notif-title').textContent = title;
+  document.getElementById('notif-desc').textContent = desc;
+  toast.style.display = 'flex';
+  toast.style.animation = 'none'; toast.offsetHeight;
+  toast.style.animation = 'slideIn .3s ease';
+  clearTimeout(window._notifTimeout);
+  window._notifTimeout = setTimeout(() => { toast.style.display = 'none'; }, 4000);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Check saved API key
+  const saved = localStorage.getItem('opto_api_key');
+  if (saved) { apiKey = saved; document.getElementById('api-key-input-login').value = saved; }
+
+  // Show login
+  document.getElementById('screen-login').style.display = 'flex';
+
+  // Init phase 1 content
+  renderPhase(1);
+});
+</script>
+</body>
+</html>
