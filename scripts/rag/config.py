@@ -18,7 +18,9 @@ LOGS_DIR = SCRIPTS_DIR / "logs"
 # ── Chunking ───────────────────────────────────────────
 CHUNK_SIZE = 800        # tokens por chunk (tokenizer cl100k, el de text-embedding-3-small)
 CHUNK_OVERLAP = 100     # tokens de solapamiento entre chunks
-BATCH_SIZE = 20         # chunks por batch de embeddings
+BATCH_SIZE = 10         # chunks por batch de embeddings (~8k tokens/batch)
+# ritmo mínimo entre batches: 8k tokens cada 13s ≈ 37k TPM < límite 40k TPM
+EMBED_MIN_INTERVALO = 13.0
 
 # ── Modelos ────────────────────────────────────────────
 MODEL_TRADUCCION = "claude-haiku-4-5"       # barato para traducción masiva

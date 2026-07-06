@@ -67,7 +67,7 @@ def ingesta_capitulo(cap: dict, documento_id: str, pdf_path, log, progress, task
         return 0, False
 
     progress.update(task, description=f"Cap {n}: embeddings ({len(chunks)} chunks)")
-    embeddings = pipeline.embed_batch(chunks)
+    embeddings = pipeline.embed_batch(chunks, log)
 
     metadata = {
         "libro": config.KANSKI_FILE,

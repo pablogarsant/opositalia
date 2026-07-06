@@ -1,6 +1,7 @@
 """Funciones compartidas del pipeline RAG (usadas por 02, 03, 04 y search)."""
 
 import logging
+import re
 import time
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +10,7 @@ import fitz  # pymupdf
 import tiktoken
 from anthropic import Anthropic
 from langdetect import detect, LangDetectException
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 from supabase import Client, create_client
 
 import config
@@ -33,7 +34,9 @@ def cliente_anthropic() -> Anthropic:
 def cliente_openai() -> OpenAI:
     global _openai
     if _openai is None:
-        _openai = OpenAI(max_retries=4)  # OPENAI_API_KEY del entorno
+        # max_retries=0: los 429 los gestiona embed_batch respetando el
+        # "try again in X.XXXs" del error (el retry del SDK no lo respeta)
+        _openai = OpenAI(max_retries=0)  # OPENAI_API_KEY del entorno
     return _openai
 
 
@@ -78,10 +81,14 @@ def crear_logger(nombre: str) -> logging.Logger:
 # ── Extracción ─────────────────────────────────────────
 
 def extraer_texto(pdf_path: Path, pagina_ini: int = 0, pagina_fin: int | None = None) -> str:
-    """Extrae texto plano de un rango de páginas [ini, fin) 0-indexed."""
+    """Extrae texto plano de un rango de páginas [ini, fin) 0-indexed.
+
+    Elimina caracteres NUL que algunos PDFs arrastran: Postgres los rechaza
+    (error 22P05 '\\u0000 cannot be converted to text').
+    """
     doc = fitz.open(pdf_path)
     fin = min(pagina_fin if pagina_fin is not None else doc.page_count, doc.page_count)
-    partes = [doc[i].get_text() for i in range(pagina_ini, fin)]
+    partes = [doc[i].get_text().replace("\x00", "") for i in range(pagina_ini, fin)]
     doc.close()
     return "\n".join(partes)
 
@@ -214,14 +221,52 @@ def contar_tokens(texto: str) -> int:
 
 # ── Embeddings ─────────────────────────────────────────
 
-def embed_batch(textos: list[str]) -> list[list[float]]:
-    """Embeddings en lotes de BATCH_SIZE con text-embedding-3-small."""
+_ultimo_batch_ts = 0.0  # pacing entre batches (límite 40k TPM del tier bajo)
+
+
+def _espera_del_429(mensaje: str) -> float | None:
+    """Extrae los segundos de 'Please try again in X.XXXs' del error de OpenAI."""
+    m = re.search(r"try again in ([\d.]+)s", mensaje)
+    return float(m.group(1)) if m else None
+
+
+def embed_batch(textos: list[str], log: logging.Logger | None = None) -> list[list[float]]:
+    """Embeddings en lotes de BATCH_SIZE, respetando el rate limit de OpenAI.
+
+    - Ritmo mínimo EMBED_MIN_INTERVALO entre batches (no saturar 40k TPM).
+    - En 429: espera lo que pide el error (+2s de margen) o backoff exponencial.
+    - Máximo 5 intentos por batch; después, excepción clara.
+    """
+    global _ultimo_batch_ts
     client = cliente_openai()
     vectores: list[list[float]] = []
+
     for i in range(0, len(textos), config.BATCH_SIZE):
         lote = textos[i : i + config.BATCH_SIZE]
-        resp = client.embeddings.create(model=config.MODEL_EMBEDDING, input=lote)
-        vectores.extend(d.embedding for d in resp.data)
+        n_batch = i // config.BATCH_SIZE + 1
+
+        transcurrido = time.time() - _ultimo_batch_ts
+        if transcurrido < config.EMBED_MIN_INTERVALO:
+            time.sleep(config.EMBED_MIN_INTERVALO - transcurrido)
+
+        for intento in range(5):
+            try:
+                resp = client.embeddings.create(model=config.MODEL_EMBEDDING, input=lote)
+                vectores.extend(d.embedding for d in resp.data)
+                _ultimo_batch_ts = time.time()
+                break
+            except RateLimitError as e:
+                pedido = _espera_del_429(str(e))
+                espera = (pedido + 2.0 + 5.0 * intento) if pedido else 10.0 * (2**intento)
+                if intento == 4:
+                    raise RuntimeError(
+                        f"Embeddings: 5 reintentos agotados en batch {n_batch} "
+                        f"({len(lote)} chunks). Último error: {e}"
+                    ) from e
+                if log:
+                    log.warning("429 en batch %d, intento %d/5 — espero %.1fs", n_batch, intento + 1, espera)
+                time.sleep(espera)
+
     return vectores
 
 
