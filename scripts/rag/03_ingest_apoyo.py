@@ -56,7 +56,7 @@ def ingesta_libro(pdf_path, log, progress, task) -> tuple[int, bool]:
         chunks = pipeline.chunk_semantico(texto)
         if not chunks:
             continue
-        embeddings = pipeline.embed_batch(chunks)
+        embeddings = pipeline.embed_batch(chunks, log)
         metadata = {
             "libro": titulo,
             "libro_principal": False,

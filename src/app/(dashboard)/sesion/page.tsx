@@ -1,3 +1,7 @@
+import SesionActiva from "@/components/sesion/SesionActiva";
+
 export default function SesionPage() {
-  return <div className="p-6"><h1 className="text-xl font-semibold">Sesión de estudio</h1></div>;
+  // Tema demo hasta que el plan (fase 4) dicte la sesión del día.
+  // Coincide con la "sesión de hoy" hardcodeada del dashboard.
+  return <SesionActiva tema="Párpados" bloque="Órbita y párpados" />;
 }
