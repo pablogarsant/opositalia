@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { Flashcard } from "@/lib/anthropic/sesion";
+import FavoritoButton from "@/components/shared/FavoritoButton";
 
 interface Props {
   flashcards: Flashcard[];
+  bloque: string;
   onDone: () => void;
 }
 
 const DIFICULTAD = { 1: "Básica", 2: "Media", 3: "Avanzada" } as const;
 
-export default function PhaseRepaso({ flashcards, onDone }: Props) {
+export default function PhaseRepaso({ flashcards, bloque, onDone }: Props) {
   const [indice, setIndice] = useState(0);
   const [volteada, setVolteada] = useState(false);
   const carta = flashcards[indice];
@@ -30,8 +32,17 @@ export default function PhaseRepaso({ flashcards, onDone }: Props) {
         <span>
           Tarjeta {indice + 1} de {flashcards.length}
         </span>
-        <span className="rounded-full bg-surface-2 px-2.5 py-0.5">
-          {DIFICULTAD[carta.dificultad] ?? "Media"}
+        <span className="flex items-center gap-1">
+          <span className="rounded-full bg-surface-2 px-2.5 py-0.5">
+            {DIFICULTAD[carta.dificultad] ?? "Media"}
+          </span>
+          <FavoritoButton
+            key={indice}
+            tipo="flashcard"
+            titulo={carta.pregunta.slice(0, 120)}
+            contenido={{ pregunta: carta.pregunta, respuesta: carta.respuesta }}
+            bloque={bloque}
+          />
         </span>
       </div>
 

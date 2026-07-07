@@ -162,12 +162,16 @@ export default function SesionActiva({ tema, bloque }: Props) {
 
       {/* contenido de la fase */}
       <section className="rounded-xl border border-border bg-surface p-5 md:p-7">
-        {faseActual === 1 && <PhaseRepaso flashcards={contenido.repaso.flashcards} onDone={avanzar} />}
+        {faseActual === 1 && (
+          <PhaseRepaso flashcards={contenido.repaso.flashcards} bloque={bloque} onDone={avanzar} />
+        )}
         {faseActual === 2 && (
           <PhaseConceptos conceptos={contenido.lectura.conceptos_clave} onDone={avanzar} />
         )}
         {faseActual === 3 && <PhaseMapa mapa={contenido.lectura.mapa_mental} onDone={avanzar} />}
-        {faseActual === 4 && <PhaseLectura textos={contenido.lectura.textos} onDone={avanzar} />}
+        {faseActual === 4 && (
+          <PhaseLectura textos={contenido.lectura.textos} bloque={bloque} onDone={avanzar} />
+        )}
         {faseActual === 5 && (
           <PhaseExamen
             preguntas={contenido.examen.preguntas}

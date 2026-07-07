@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Lock, MessageCircle, Send, X } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface Props {
   tema: string;
@@ -113,13 +114,28 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
               {mensajes.map((m, i) => (
                 <div
                   key={i}
-                  className={`max-w-[85%] rounded-xl px-3 py-2 text-[13px] leading-relaxed ${
+                  className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
                     m.role === "user"
                       ? "self-end bg-accent text-accent-fg"
                       : "self-start border border-border bg-surface-2 text-ink"
                   }`}
                 >
-                  {m.content || (generando && i === mensajes.length - 1 ? "…" : "")}
+                  {m.role === "assistant" ? (
+                    <div className="flex flex-col gap-2 [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_strong]:font-semibold">
+                      <ReactMarkdown
+                        components={{
+                          // sin jerarquía de headings dentro del chat
+                          h1: ({ children }) => <p className="font-semibold">{children}</p>,
+                          h2: ({ children }) => <p className="font-semibold">{children}</p>,
+                          h3: ({ children }) => <p className="font-semibold">{children}</p>,
+                        }}
+                      >
+                        {m.content || (generando && i === mensajes.length - 1 ? "…" : "")}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    m.content
+                  )}
                 </div>
               ))}
             </div>
