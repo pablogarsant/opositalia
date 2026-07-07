@@ -5,6 +5,10 @@ import type { NextConfig } from "next";
 // se añade en beta con @serwist/next o equivalente compatible.
 
 const nextConfig: NextConfig = {
+  images: {
+    // avatares de Clerk (images.domains está deprecated en Next 16)
+    remotePatterns: [{ protocol: "https", hostname: "img.clerk.com" }],
+  },
   // headers de seguridad básicos
   async headers() {
     return [

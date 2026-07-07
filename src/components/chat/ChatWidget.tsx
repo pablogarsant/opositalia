@@ -73,11 +73,14 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
           }
         }
       }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "error";
+    } catch {
+      // mensaje amigable: el detalle técnico no le sirve a la alumna
       setMensajes((prev) => {
         const copia = [...prev];
-        copia[copia.length - 1] = { role: "assistant", content: `⚠️ ${msg}` };
+        copia[copia.length - 1] = {
+          role: "assistant",
+          content: "No pude conectar ahora mismo. Inténtalo de nuevo en unos segundos.",
+        };
         return copia;
       });
     } finally {
