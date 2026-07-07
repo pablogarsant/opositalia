@@ -1,4 +1,4 @@
-import { addDays, isWeekend, format } from "date-fns";
+import { addDays, format } from "date-fns";
 import type { ConfigPlan } from "./types";
 
 export function siguienteFechaDisponible(desde: Date, config: ConfigPlan): Date {

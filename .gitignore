@@ -33,6 +33,7 @@ yarn-error.log*
 # env files
 .env*
 !.env.example
+!.env.production.example
 
 # vercel
 .vercel
@@ -40,3 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# RAG pipeline
+scripts/rag/.env
+scripts/rag/logs/
+scripts/rag/__pycache__/
+scripts/rag/.venv/
+*.pyc

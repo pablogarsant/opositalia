@@ -1,15 +1,23 @@
-type SessionType = "lectura" | "repaso" | "examen";
+import type { TipoSesion } from "@/lib/plan/types";
 
-const styles: Record<SessionType, string> = {
-  lectura: "bg-blue-100 text-blue-700",
-  repaso: "bg-amber-100 text-amber-700",
-  examen: "bg-red-100 text-red-700",
+const ESTILOS: Record<TipoSesion, string> = {
+  lectura: "bg-info-dim text-info",
+  repaso: "bg-warn-dim text-warn",
+  examen: "bg-danger-dim text-danger",
 };
 
-export default function SessionTypeBadge({ type }: { type: SessionType }) {
+const LABELS: Record<TipoSesion, string> = {
+  lectura: "Lectura",
+  repaso: "Repaso",
+  examen: "Examen",
+};
+
+export default function SessionTypeBadge({ type }: { type: TipoSesion }) {
   return (
-    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${styles[type]}`}>
-      {type.charAt(0).toUpperCase() + type.slice(1)}
+    <span
+      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTILOS[type]}`}
+    >
+      {LABELS[type]}
     </span>
   );
 }

@@ -1,10 +1,25 @@
-interface Props { value: number; max?: number; className?: string }
+interface Props {
+  value: number;
+  max?: number;
+  label?: string;
+  className?: string;
+}
 
-export default function ProgressBar({ value, max = 100, className = "" }: Props) {
-  const pct = Math.min(100, Math.round((value / max) * 100));
+export default function ProgressBar({ value, max = 100, label, className = "" }: Props) {
+  const pct = Math.min(100, Math.max(0, Math.round((value / max) * 100)));
   return (
-    <div className={`h-2 bg-gray-100 rounded-full overflow-hidden ${className}`}>
-      <div className="h-full bg-[#2B5BA8] transition-all" style={{ width: `${pct}%` }} />
+    <div
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={max}
+      aria-label={label}
+      className={`h-1.5 overflow-hidden rounded-full bg-border ${className}`}
+    >
+      <div
+        className="h-full rounded-full bg-accent transition-[width] duration-500"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

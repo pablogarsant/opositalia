@@ -1,5 +1,6 @@
 -- ══════════════════════════════════════════
--- OPOSITALIA — Schema v1.0
+-- OPOSITALIA — Schema v1.1
+-- (v1.1: perfiles.tema — ver migrations/0001)
 -- ══════════════════════════════════════════
 
 create extension if not exists "uuid-ossp";
@@ -15,6 +16,7 @@ create table public.perfiles (
   email         text,
   rol           text default 'alumno' check (rol in ('alumno', 'admin', 'tutor')),
   avatar_url    text,
+  tema          text default 'cielo' check (tema in ('cielo', 'salvia', 'arena', 'niebla', 'noche')),
   created_at    timestamptz default now(),
   updated_at    timestamptz default now()
 );
