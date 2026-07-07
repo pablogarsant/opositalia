@@ -6,18 +6,17 @@ export interface MensajeChat {
   content: string;
 }
 
-const SYSTEM_CONSULTOR = `Eres el consultor médico de Opositalia, una plataforma de preparación del examen OIR (Oftalmología, SAS Andalucía). Tu alumna está estudiando y te consulta dudas.
+const SYSTEM_CONSULTOR = `Eres el asistente de estudio de Opositalia, experto en oftalmología clínica para la oposición OIR del SAS Andalucía. Responde de forma directa, concisa y en español. Usa negritas para términos clave. Cuando cites datos clínicos importantes menciona la fuente si la conoces (Kanski, Boyd, guías SAS). Nunca uses disclaimers sobre el origen de la información.
 
-Reglas:
-- Responde SIEMPRE en español de España, con terminología médica estándar.
-- Sé preciso y pedagógico: explica el porqué, no solo el qué.
-- Básate prioritariamente en el CONTEXTO DEL TEMARIO que se te proporciona (fragmentos del Kanski y bibliografía). Si el contexto no cubre la pregunta, dilo explícitamente y responde con tu conocimiento general marcándolo como tal.
-- No inventes datos clínicos, dosis ni clasificaciones.
-- Respuestas concisas: 2-6 frases salvo que pidan desarrollo.`;
+Reglas de estilo:
+- Nunca digas "buena pregunta" ni valides la pregunta antes de responder.
+- No uses emojis salvo que el usuario los use primero.
+- Respuestas de 2-6 frases salvo que pidan desarrollo.
+- No inventes datos clínicos, dosis ni clasificaciones.`;
 
 /**
- * Chatbot consultor con contexto RAG. Devuelve el stream del SDK de Anthropic;
- * la route lo convierte en SSE.
+ * Chatbot con contexto RAG y fallback en dos niveles:
+ * bloque → corpus completo → conocimiento general (sin avisar al usuario).
  */
 export async function streamChatConRag(params: {
   mensaje: string;
@@ -27,16 +26,17 @@ export async function streamChatConRag(params: {
 }) {
   const { mensaje, temaActual, bloque, historial = [] } = params;
 
-  // si el RAG falla, el chat degrada a conocimiento general (no rompe)
-  const chunks = await searchRag(mensaje, bloque, 6).catch(() => []);
+  let chunks = await searchRag(mensaje, bloque, 6).catch(() => []);
+  if (chunks.length === 0 && bloque) {
+    // el tema puede estar cubierto por otro bloque del corpus
+    chunks = await searchRag(mensaje, null, 6).catch(() => []);
+  }
   const contexto = formatearContexto(chunks);
 
   const system = [
     SYSTEM_CONSULTOR,
     temaActual ? `\nTema que está estudiando ahora: ${temaActual}.` : "",
-    contexto
-      ? `\n== CONTEXTO DEL TEMARIO ==\n${contexto}`
-      : "\n(No se encontró contexto en el temario para esta consulta.)",
+    contexto ? `\n== MATERIAL DE REFERENCIA ==\n${contexto}` : "",
   ].join("\n");
 
   return anthropic.messages.stream({
