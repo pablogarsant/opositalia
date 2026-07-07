@@ -1,4 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { getPerfil } from "@/lib/perfil";
@@ -11,6 +12,14 @@ export default async function DashboardLayout({
   // El middleware garantiza sesión; currentUser solo puede ser null en edge cases
   const user = await currentUser();
   const perfil = user ? await getPerfil(user.id) : null;
+
+  // arranque guiado: sin perfil (webhook pendiente) o sin onboarding → /onboarding.
+  // Comparación con false (no falsy): si la migración 0004 aún no está aplicada,
+  // la columna no viene y los usuarios existentes siguen entrando al dashboard.
+  if (!perfil || perfil.onboarding_completado === false) {
+    redirect("/onboarding");
+  }
+
   const nombre =
     perfil?.nombre ?? [user?.firstName, user?.lastName].filter(Boolean).join(" ") ?? "Opositora";
 

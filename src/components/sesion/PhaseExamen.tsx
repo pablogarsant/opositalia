@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { PreguntaExamen } from "@/lib/anthropic/sesion";
 import { UMBRAL_REFUERZO } from "@/lib/plan/types";
+import FavoritoButton from "@/components/shared/FavoritoButton";
 
 interface Props {
   preguntas: PreguntaExamen[];
@@ -62,6 +63,19 @@ export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque }: Pro
         refuerzo: json.data.refuerzo_recomendado,
         guardado: true,
       });
+      // bajo el umbral: el plan inserta sesión de refuerzo automáticamente
+      if (json.data.refuerzo_recomendado && bloqueId) {
+        void fetch("/api/plan/reorganizar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tipo: "resultado",
+            bloque_id: bloqueId,
+            tema_id: temaId,
+            pct: json.data.dominio,
+          }),
+        }).catch(() => undefined);
+      }
     } catch (e) {
       // el resultado local se muestra aunque falle el guardado
       setResultado({
@@ -108,7 +122,13 @@ export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque }: Pro
                   ) : (
                     <XCircle size={18} className="mt-0.5 shrink-0 text-danger" aria-hidden />
                   )}
-                  <p className="text-sm font-medium text-ink">{p.enunciado}</p>
+                  <p className="min-w-0 flex-1 text-sm font-medium text-ink">{p.enunciado}</p>
+                  <FavoritoButton
+                    tipo="pregunta"
+                    titulo={p.enunciado.slice(0, 120)}
+                    contenido={{ enunciado: p.enunciado, opciones: p.opciones, correcta: p.correcta, explicacion: p.explicacion }}
+                    bloque={bloque}
+                  />
                 </div>
                 <p className="mt-2 pl-6 text-[13px] text-ink-2">
                   <span className="font-semibold text-ok">
