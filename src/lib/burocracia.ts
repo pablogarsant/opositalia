@@ -25,38 +25,44 @@ export interface DatosBurocracia {
   ultima_actualizacion: string;
 }
 
-/** Fallback (datos del prototipo, pendientes de confirmar con la búsqueda web). */
+/** Datos reales de la convocatoria FEA OIR 2025 (SAS). Sirven de fallback y
+ * coinciden con la migración 0006; la búsqueda web los actualiza si hay novedad. */
 export const DATOS_FALLBACK: DatosBurocracia = {
-  convocatoria: "OIR 2026",
-  especialidad: "Oftalmólogo/a",
+  convocatoria: "FEA OIR 2025",
+  especialidad: "FEA Oftalmología",
   organismo: "SAS — Servicio Andaluz de Salud",
-  total_plazas: 12,
-  plazas_ope: 10,
-  plazas_discapacidad: 2,
-  fecha_examen: "2026-06-14",
-  plazo_inscripcion_inicio: "2026-01-15",
-  plazo_inscripcion_fin: "2026-02-15",
-  enlace_boja: "https://www.juntadeandalucia.es/boja",
+  total_plazas: 30,
+  plazas_ope: 29,
+  plazas_discapacidad: 3,
+  fecha_examen: "Pendiente de publicación (2026)",
+  plazo_inscripcion_inicio: "2025-03-07",
+  plazo_inscripcion_fin: "2025-04-28",
+  enlace_boja:
+    "https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/profesionales/ofertas-de-empleo/oferta-de-empleo-publico-puestos-base/convocatorias-oep-2025/cuadro-de-evolucion/fea-oftalmologia",
   estructura_examen: {
-    preguntas: 100,
-    preguntas_reserva: 10,
-    duracion_min: 120,
-    penalizacion: "Cada 3 errores restan 1 acierto",
-    nota_minima: 5,
+    preguntas: 150,
+    preguntas_reserva: 3,
+    duracion_min: 180,
+    penalizacion: "Un error resta 1/4 de un acierto (-E/4)",
+    nota_minima: 40,
   },
   timeline: [
-    { fecha: "2026-01-15", hito: "Apertura de inscripción", descripcion: "Presentación telemática en el portal del SAS", completado: true },
-    { fecha: "2026-02-15", hito: "Cierre de inscripción", descripcion: "Último día para presentar solicitud y tasas", completado: true },
-    { fecha: "2026-04-30", hito: "Lista provisional de admitidos", descripcion: "Publicación en BOJA y web del SAS", completado: false },
-    { fecha: "2026-06-14", hito: "Examen", descripcion: "Prueba tipo test en sede por determinar", completado: false },
+    { fecha: "2025-01-27", hito: "Publicación bases generales", descripcion: "BOJA nº 17", completado: true },
+    { fecha: "2025-03-07", hito: "Convocatoria específica FEA Oftalmología", descripcion: "BOJA nº 45", completado: true },
+    { fecha: "2025-04-29", hito: "Plazo de autobaremo de méritos", descripcion: "15 días hábiles", completado: true },
+    { fecha: "2025-12-31", hito: "Lista provisional de admitidos", descripcion: "Pendiente de publicación por el SAS", completado: false },
+    { fecha: "2026-06-30", hito: "Fecha del examen", descripcion: "Pendiente de publicación", completado: false },
+    { fecha: "2026-12-31", hito: "Resolución y adjudicación de plazas", descripcion: "Pendiente", completado: false },
   ],
   requisitos: [
-    "Título de Médico Especialista en Oftalmología",
-    "Nacionalidad española o de un estado miembro de la UE",
-    "No haber sido separado del servicio de ninguna administración pública",
-    "Abono de tasas o justificante de exención",
+    "Licenciado/Graduado en Medicina y Cirugía",
+    "Título de Especialista en Oftalmología vía MIR",
+    "Nacionalidad española o comunitaria (o asimilado por Tratados Internacionales)",
+    "No haber sido separado por expediente disciplinario en los 6 años anteriores",
+    "No estar inhabilitado para el ejercicio de funciones públicas",
+    "No poseer plaza de personal estatutario fijo en la misma categoría en el SNS",
   ],
-  ultima_actualizacion: "prototipo — pendiente de confirmar con la convocatoria oficial",
+  ultima_actualizacion: "2025-07-12 — fuentes oficiales SAS/BOJA",
 };
 
 const DIAS_CACHE = 7;
@@ -75,11 +81,11 @@ async function buscarConvocatoria(): Promise<DatosBurocracia | null> {
     max_tokens: 3000,
     tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 }],
     system:
-      "Eres un asistente que verifica convocatorias de oposiciones sanitarias en España. Busca información OFICIAL (BOJA, web del SAS) y responde SOLO con JSON válido, sin markdown.",
+      "Eres un asistente que verifica convocatorias de oposiciones sanitarias en España. Busca información OFICIAL en el BOJA (juntadeandalucia.es/eboja.html) y en la web del SAS (sspa.juntadeandalucia.es, sección ofertas de empleo público). Responde SOLO con JSON válido, sin markdown.",
     messages: [
       {
         role: "user",
-        content: `Busca la convocatoria vigente de la oposición de Oftalmología (OIR / FEA Oftalmología) del SAS Andalucía 2025-2026: plazas, fecha de examen, plazo de inscripción, requisitos, estructura del examen y enlace al BOJA.
+        content: `Busca la convocatoria más reciente de FEA Oftalmología del SAS Andalucía (BOJA 2025-2026): plazas, fecha de examen, plazo de inscripción, requisitos, estructura del examen y enlace al BOJA. Consulta el cuadro de evolución de la OEP del SAS para FEA Oftalmología.
 
 Si encuentras datos oficiales, responde con este JSON exacto (fechas yyyy-mm-dd):
 ${JSON.stringify({ convocatoria: "", especialidad: "", organismo: "", total_plazas: 0, plazas_ope: 0, plazas_discapacidad: 0, fecha_examen: "", plazo_inscripcion_inicio: "", plazo_inscripcion_fin: "", enlace_boja: "", estructura_examen: { preguntas: 0, preguntas_reserva: 0, duracion_min: 0, penalizacion: "", nota_minima: 0 }, timeline: [{ fecha: "", hito: "", descripcion: "", completado: false }], requisitos: [""], ultima_actualizacion: "" })}

@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
     .order("orden");
   const temasRes = await sb
     .from("temas")
-    .select("id, titulo, orden, horas_estimadas, bloque_id")
+    .select("id, titulo, orden, horas_estimadas, bloque_id, parte")
     .order("orden");
   if (!bloquesRes.data?.length || !temasRes.data?.length) {
     return NextResponse.json(
@@ -112,7 +112,12 @@ export async function POST(req: NextRequest) {
     titulo: b.titulo,
     temas: (temasRes.data ?? [])
       .filter((t) => t.bloque_id === b.id)
-      .map((t) => ({ id: t.id, titulo: t.titulo, horas: Number(t.horas_estimadas) || 2 })),
+      .map((t) => ({
+        id: t.id,
+        titulo: t.titulo,
+        horas: Number(t.horas_estimadas) || 2,
+        parte: (t as { parte?: "comun" | "especifica" }).parte,
+      })),
   }));
 
   const sesiones = generarSesiones({

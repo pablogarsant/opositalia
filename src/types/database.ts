@@ -53,6 +53,39 @@ export type TemaRow = {
   orden: number;
   horas_estimadas: number;
   dificultad: number;
+  // columnas de la migración 0005 (opcionales hasta aplicarla)
+  numero_boja?: number | null;
+  texto_boja?: string | null;
+  parte?: "comun" | "especifica" | null;
+  capitulo_kanski?: string | null;
+  paginas_kanski?: string | null;
+};
+
+export type SubtemaRow = {
+  id: string;
+  tema_id: string | null;
+  titulo: string;
+  orden: number;
+  descripcion: string | null;
+  created_at: string;
+};
+
+export type PuntoRow = {
+  id: string;
+  subtema_id: string | null;
+  titulo: string;
+  orden: number;
+  descripcion: string | null;
+  keywords: string[] | null;
+  created_at: string;
+};
+
+export type ProgresoPuntoRow = {
+  id: string;
+  perfil_id: string;
+  punto_id: string;
+  dominio: number;
+  ultima_sesion: string | null;
 };
 
 export type SesionEstudioInsert = {
@@ -240,6 +273,24 @@ export type Database = {
         Row: TemaRow;
         Insert: Omit<TemaRow, "id">;
         Update: Partial<Omit<TemaRow, "id">>;
+        Relationships: [];
+      };
+      subtemas: {
+        Row: SubtemaRow;
+        Insert: Omit<SubtemaRow, "id" | "created_at"> & { descripcion?: string | null };
+        Update: Partial<Omit<SubtemaRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      puntos: {
+        Row: PuntoRow;
+        Insert: Omit<PuntoRow, "id" | "created_at"> & { descripcion?: string | null; keywords?: string[] | null };
+        Update: Partial<Omit<PuntoRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      progreso_puntos: {
+        Row: ProgresoPuntoRow;
+        Insert: Omit<ProgresoPuntoRow, "id"> & { dominio?: number; ultima_sesion?: string | null };
+        Update: Partial<Omit<ProgresoPuntoRow, "id">>;
         Relationships: [];
       };
       sesiones_estudio: {
