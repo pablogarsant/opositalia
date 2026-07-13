@@ -54,7 +54,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const chunks = await searchRag(`${tema} ${bloque}`, bloque, 8);
+    // filtra por bloque; si el bloque es grueso (p.ej. "Parte Específica")
+    // y no casa con el bloque_oir fino de los chunks, cae a todo el corpus
+    let chunks = await searchRag(`${tema} ${bloque}`, bloque, 8);
+    if (chunks.length < 3) {
+      chunks = await searchRag(`${tema} ${bloque}`, null, 8);
+    }
     const contexto = formatearContexto(chunks);
     const contenido = await generarContenidoSesion(tipo_sesion, tema, bloque, contexto);
 

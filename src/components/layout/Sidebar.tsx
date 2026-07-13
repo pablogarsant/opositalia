@@ -8,6 +8,7 @@ import {
   CalendarDays,
   FileText,
   LayoutDashboard,
+  ListTree,
   Map,
   NotebookPen,
   Play,
@@ -26,6 +27,7 @@ const SECCIONES = [
     items: [
       { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/sesion", label: "Sesión de hoy", icon: Play },
+      { href: "/temario", label: "Temario", icon: ListTree },
       { href: "/calendario", label: "Calendario", icon: CalendarDays },
       { href: "/informe", label: "Informe semanal", icon: BarChart3 },
     ],

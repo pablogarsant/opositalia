@@ -23,14 +23,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: { ignored: evt.type }, error: null });
   }
 
-  const { id, first_name, last_name, email_addresses, primary_email_address_id, image_url } =
+  const { id, first_name, last_name, username, email_addresses, primary_email_address_id, image_url } =
     evt.data;
 
   const email =
     email_addresses?.find((e) => e.id === primary_email_address_id)?.email_address ??
     email_addresses?.[0]?.email_address ??
     null;
-  const nombre = [first_name, last_name].filter(Boolean).join(" ") || null;
+  // Nombre en cadena de fallbacks; sin trim/replace para no perder tildes ni
+  // espacios (la columna perfiles.nombre es TEXT y acepta Unicode).
+  const nombre =
+    first_name && last_name
+      ? `${first_name} ${last_name}`
+      : first_name || username || email?.split("@")[0] || "Usuario";
 
   const supabase = supabaseAdmin();
 

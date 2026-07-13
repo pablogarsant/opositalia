@@ -1,13 +1,20 @@
 /**
  * Generador de plan de estudio. Puro e isomorfo: el server lo usa para
- * persistir y el onboarding para el preview. Ciclo por bloque:
- * lecturas de cada tema → repaso del bloque → examen del bloque.
+ * persistir y el onboarding para el preview.
+ *
+ * Ciclo por tema (temario BOJA de 107 temas):
+ *  - Parte común: leer → repasar.
+ *  - Parte específica: leer ×N (según nº de puntos y profundidad) → repasar → examinar.
+ *  - Fin de cada bloque: 1 simulacro acumulado.
+ *  - Fin del temario: 3 simulacros generales.
  */
 
 export interface TemaPlan {
   id: string;
   titulo: string;
   horas: number;
+  parte?: "comun" | "especifica";
+  puntos?: number; // nº de puntos específicos del tema (peso real)
 }
 
 export interface BloquePlan {
@@ -20,6 +27,7 @@ export interface ConfigGeneracion {
   /** días de la semana disponibles, 0=domingo … 6=sábado (getDay de JS) */
   dias_semana: number[];
   horas_sesion: number;
+  /** profundidad del plan: reetiquetada en el onboarding como básica/completa/exhaustiva */
   intensidad: "ligera" | "media" | "intensa";
 }
 
@@ -31,29 +39,46 @@ export interface SesionGenerada {
   orden: number;
 }
 
-const FACTOR_INTENSIDAD = { ligera: 0.75, media: 1, intensa: 1.25 } as const;
+// multiplicador de lecturas por profundidad (básica / completa / exhaustiva)
+const FACTOR = { ligera: 0.5, media: 1, intensa: 1.5 } as const;
 
 function fmt(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Nº de sesiones de lectura que necesita un tema según horas y config. */
+/** Nº de sesiones de lectura para un tema específico según puntos y profundidad. */
 function lecturasDeTema(tema: TemaPlan, config: ConfigGeneracion): number {
-  const base = Math.ceil(tema.horas / config.horas_sesion);
-  return Math.max(1, Math.round(base * FACTOR_INTENSIDAD[config.intensidad]));
+  const puntos = tema.puntos ?? Math.round(tema.horas); // fallback si no hay puntos
+  const base = puntos <= 8 ? 1 : 2; // cap 2 lecturas por tema (plan realista)
+  return Math.max(1, Math.round(base * FACTOR[config.intensidad]));
 }
+
+/**
+ * Secuencia de tipos de sesión de un tema (sin fechas).
+ * Común: leer → repasar. Específica: leer ×N → examinar (la consolidación
+ * por repaso se hace en el simulacro de bloque, no por tema, para que el
+ * plan no se dispare con 107 temas).
+ */
+function sesionesDeTema(tema: TemaPlan, config: ConfigGeneracion): SesionGenerada["tipo"][] {
+  if (tema.parte === "comun") return ["lectura", "repaso"];
+  return [...Array<"lectura">(lecturasDeTema(tema, config)).fill("lectura"), "examen"];
+}
+
+const SIMULACROS_FINALES = 3;
 
 /** Total de sesiones del plan sin fechas (para el preview del onboarding). */
 export function contarSesiones(bloques: BloquePlan[], config: ConfigGeneracion): number {
-  return bloques.reduce(
-    (acc, b) => acc + b.temas.reduce((a, t) => a + lecturasDeTema(t, config), 0) + 2, // + repaso + examen
-    0
-  );
+  let total = 0;
+  for (const bloque of bloques) {
+    for (const tema of bloque.temas) total += sesionesDeTema(tema, config).length;
+    total += 1; // simulacro de bloque
+  }
+  return total + SIMULACROS_FINALES;
 }
 
 /**
  * Genera las sesiones con fecha, una por día disponible, desde fechaInicio.
- * No trunca en fechaExamen: si no cabe, el caller lo reporta como aviso.
+ * No trunca en la fecha objetivo: si no cabe, el caller lo reporta como aviso.
  */
 export function generarSesiones(params: {
   bloques: BloquePlan[];
@@ -73,33 +98,22 @@ export function generarSesiones(params: {
   };
 
   let orden = 0;
+  const push = (tipo: SesionGenerada["tipo"], bloqueId: string, temaId: string | null) =>
+    sesiones.push({ tema_id: temaId, bloque_id: bloqueId, fecha_programada: siguienteFecha(), tipo, orden: orden++ });
+
   for (const bloque of bloques) {
     for (const tema of bloque.temas) {
-      const n = lecturasDeTema(tema, config);
-      for (let i = 0; i < n; i++) {
-        sesiones.push({
-          tema_id: tema.id,
-          bloque_id: bloque.id,
-          fecha_programada: siguienteFecha(),
-          tipo: "lectura",
-          orden: orden++,
-        });
+      for (const tipo of sesionesDeTema(tema, config)) {
+        // lectura/repaso/examen del tema apuntan al tema; el simulacro de bloque no
+        push(tipo, bloque.id, tema.id);
       }
     }
-    sesiones.push({
-      tema_id: null,
-      bloque_id: bloque.id,
-      fecha_programada: siguienteFecha(),
-      tipo: "repaso",
-      orden: orden++,
-    });
-    sesiones.push({
-      tema_id: null,
-      bloque_id: bloque.id,
-      fecha_programada: siguienteFecha(),
-      tipo: "examen",
-      orden: orden++,
-    });
+    push("examen", bloque.id, null); // simulacro acumulado del bloque
+  }
+  // simulacros generales finales (sobre el último bloque a efectos de FK)
+  const ultimoBloque = bloques[bloques.length - 1]?.id;
+  if (ultimoBloque) {
+    for (let i = 0; i < SIMULACROS_FINALES; i++) push("examen", ultimoBloque, null);
   }
   return sesiones;
 }
