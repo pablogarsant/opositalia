@@ -3,6 +3,21 @@
 -- Mismo shape que src/lib/burocracia.ts (DatosBurocracia) para que la página no
 -- muestre campos vacíos. Idempotente por 'convocatoria'.
 
+-- Autosuficiente: crea burocracia_cache si la 0004 no llegó a aplicarse
+-- (en producción la app funcionaba con el fallback estático).
+create table if not exists public.burocracia_cache (
+  id               uuid primary key default uuid_generate_v4(),
+  convocatoria     text not null default 'OIR-SAS',
+  datos            jsonb not null,
+  fuente_url       text,
+  fecha_publicacion date,
+  hash_contenido   text,
+  updated_at       timestamptz default now()
+);
+alter table public.burocracia_cache enable row level security;
+drop policy if exists "lectura publica burocracia" on public.burocracia_cache;
+create policy "lectura publica burocracia" on public.burocracia_cache for select using (true);
+
 create unique index if not exists uq_burocracia_convocatoria
   on public.burocracia_cache(convocatoria);
 
