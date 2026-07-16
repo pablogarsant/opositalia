@@ -49,10 +49,20 @@ def cliente_supabase() -> Client:
     return _supabase
 
 
-def con_reintentos(fn, intentos: int = 3, base: float = 2.0, log: logging.Logger | None = None):
-    """Reintento con backoff exponencial para llamadas de red (Supabase).
+def con_reintentos(
+    fn,
+    intentos: int = 5,
+    base: float = 3.0,
+    log: logging.Logger | None = None,
+    max_espera: float = 30.0,
+):
+    """Reintento con backoff exponencial (topado) para llamadas de red.
 
-    Los SDKs de Anthropic/OpenAI ya reintentan 429/5xx por su cuenta.
+    Los SDKs de Anthropic/OpenAI ya reintentan 429/5xx por su cuenta, pero no
+    aguantan ni cortes de red de minutos (DNS caído) ni 529 'Overloaded'
+    intermitentes. Contra un 529 al ~33% de éxito lo que salva el libro es
+    insistir muchas veces, no esperar más: por eso el backoff se topa en
+    max_espera en vez de crecer sin límite.
     """
     for i in range(intentos):
         try:
@@ -60,7 +70,7 @@ def con_reintentos(fn, intentos: int = 3, base: float = 2.0, log: logging.Logger
         except Exception as e:  # noqa: BLE001 — reintenta cualquier fallo de red
             if i == intentos - 1:
                 raise
-            espera = base * (2**i)
+            espera = min(base * (2**i), max_espera)
             if log:
                 log.warning("Fallo (%s), reintento %d/%d en %.0fs", e, i + 1, intentos, espera)
             time.sleep(espera)
@@ -119,11 +129,21 @@ def traducir(texto: str, log: logging.Logger) -> str:
     trozos = _partir_por_parrafos(texto, max_tokens=2000)
     traducidos = []
     for trozo in trozos:
-        resp = client.messages.create(
-            model=config.MODEL_TRADUCCION,
-            max_tokens=4096,
-            system=_SYSTEM_TRADUCCION,
-            messages=[{"role": "user", "content": trozo}],
+        # con_reintentos externo generoso: el max_retries del SDK no sobrevive ni
+        # cortes de DNS de minutos ni rachas de 529 'Overloaded'. Un libro son
+        # ~50 llamadas: con 33% de éxito por llamada hacen falta muchos intentos
+        # (no esperas largas) para que el libro entero salga. ponytail: sin esto
+        # un blip tumba el libro y hay que reingestarlo de cero (visto 4 veces).
+        resp = con_reintentos(
+            lambda t=trozo: client.messages.create(
+                model=config.MODEL_TRADUCCION,
+                max_tokens=4096,
+                system=_SYSTEM_TRADUCCION,
+                messages=[{"role": "user", "content": t}],
+            ),
+            intentos=20,
+            base=2.0,
+            log=log,
         )
         traducidos.append(resp.content[0].text)
     log.info("Traducidos %d trozos (%d chars)", len(trozos), len(texto))
