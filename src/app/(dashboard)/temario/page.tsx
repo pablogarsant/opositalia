@@ -1,14 +1,22 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { getPerfil } from "@/lib/perfil";
-import { getTemarioArbol } from "@/lib/temario";
-import TemarioArbolVista from "@/components/temario/TemarioArbol";
+import { getRelacionesTemas, getTemarioArbol } from "@/lib/temario";
+import TemarioVista from "@/components/temario/TemarioVista";
 
 export const dynamic = "force-dynamic";
 
-export default async function TemarioPage() {
+interface Props {
+  searchParams: Promise<{ vista?: string; tema?: string }>;
+}
+
+export default async function TemarioPage({ searchParams }: Props) {
+  const { vista, tema } = await searchParams;
   const user = await currentUser();
   const perfil = user ? await getPerfil(user.id) : null;
-  const arbol = await getTemarioArbol(perfil?.id ?? null);
+  const [arbol, relaciones] = await Promise.all([
+    getTemarioArbol(perfil?.id ?? null),
+    getRelacionesTemas(),
+  ]);
 
   return (
     <>
@@ -20,7 +28,12 @@ export default async function TemarioPage() {
       </header>
 
       {arbol.disponible ? (
-        <TemarioArbolVista arbol={arbol} />
+        <TemarioVista
+          arbol={arbol}
+          relaciones={relaciones}
+          vistaInicial={vista === "grafo" ? "grafo" : vista === "arbol" ? "arbol" : undefined}
+          temaInicial={tema}
+        />
       ) : (
         <div className="rounded-xl border border-warn/40 bg-warn-dim p-6">
           <p className="font-medium text-ink">El temario aún no está cargado</p>

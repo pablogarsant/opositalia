@@ -2,11 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { streamChatConRag } from "@/lib/anthropic/chat";
 
+const contextoSchema = z.object({
+  pantalla: z.string().max(60).default("dashboard"),
+  tema_id: z.string().max(60).nullish(),
+  tema_titulo: z.string().max(300).nullish(),
+  punto_id: z.string().max(60).nullish(),
+  punto_titulo: z.string().max(300).nullish(),
+  bloque: z.string().max(100).nullish(),
+  fase_sesion: z.number().int().min(1).max(5).nullish(),
+});
+
 const bodySchema = z.object({
   mensaje: z.string().min(1).max(2000),
-  tema_actual: z.string().max(200).nullish(),
-  bloque: z.string().max(100).nullish(),
-  fase: z.number().int().min(1).max(5).nullish(),
+  contexto: contextoSchema.default({ pantalla: "dashboard" }),
   historial: z
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().max(4000) }))
     .max(20)
@@ -18,22 +26,17 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ data: null, error: "Body inválido" }, { status: 400 });
   }
-  const { mensaje, tema_actual, bloque, fase, historial } = parsed.data;
+  const { mensaje, contexto, historial } = parsed.data;
 
   // el simulacro se hace sin ayuda: chatbot bloqueado en fase 5
-  if (fase === 5) {
+  if (contexto.fase_sesion === 5) {
     return NextResponse.json(
-      { data: null, error: "El consultor no está disponible durante el simulacro" },
+      { data: null, error: "El asistente no está disponible durante el simulacro" },
       { status: 403 }
     );
   }
 
-  const stream = await streamChatConRag({
-    mensaje,
-    temaActual: tema_actual,
-    bloque,
-    historial,
-  });
+  const stream = await streamChatConRag({ mensaje, contexto, historial });
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({

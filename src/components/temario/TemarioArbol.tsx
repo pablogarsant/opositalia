@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   BookOpen,
   ChevronDown,
@@ -9,11 +10,9 @@ import {
   CircleCheck,
   CircleDashed,
   CircleDot,
-  Play,
   Search,
-  X,
 } from "lucide-react";
-import type { BloqueArbol, PuntoArbol, TemarioArbol } from "@/lib/temario";
+import type { BloqueArbol, TemarioArbol } from "@/lib/temario";
 
 type Filtro = "todos" | "pendientes" | "comun" | "especifica";
 
@@ -28,7 +27,6 @@ export default function TemarioArbolVista({ arbol }: { arbol: TemarioArbol }) {
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState<Filtro>("todos");
   const [abiertos, setAbiertos] = useState<Set<string>>(new Set());
-  const [punto, setPunto] = useState<{ punto: PuntoArbol; bloque: string } | null>(null);
 
   const toggle = (id: string) =>
     setAbiertos((prev) => {
@@ -83,11 +81,6 @@ export default function TemarioArbolVista({ arbol }: { arbol: TemarioArbol }) {
   const pct = arbol.total_puntos
     ? Math.round((arbol.puntos_completados / arbol.total_puntos) * 100)
     : 0;
-
-  const estudiar = (p: PuntoArbol, bloque: string) => {
-    const parte = bloque.toLowerCase().includes("común") ? "Parte Común" : "Parte Específica";
-    router.push(`/sesion?tema=${encodeURIComponent(p.titulo)}&bloque=${encodeURIComponent(parte)}`);
-  };
 
   return (
     <>
@@ -156,30 +149,40 @@ export default function TemarioArbolVista({ arbol }: { arbol: TemarioArbol }) {
               <div className="border-t border-border px-2 pb-2">
                 {b.temas.map((t) => (
                   <div key={t.id} className="mt-1">
-                    <button
-                      type="button"
-                      onClick={() => toggle(t.id)}
-                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left hover:bg-surface-2"
-                    >
-                      {esta(t.id) ? (
-                        <ChevronDown size={14} className="text-ink-3" aria-hidden />
-                      ) : (
-                        <ChevronRight size={14} className="text-ink-3" aria-hidden />
-                      )}
-                      <span className="text-sm font-medium text-ink">{t.titulo}</span>
-                      {t.capitulo_kanski && (
-                        <span className="hidden rounded bg-surface-2 px-1.5 py-0.5 text-[10px] text-ink-3 sm:inline">
-                          {t.capitulo_kanski}
-                        </span>
-                      )}
-                      <span
-                        className={`ml-auto text-xs font-semibold ${
-                          t.completado ? "text-ok" : t.progreso_dominio > 0 ? "text-warn" : "text-ink-3"
-                        }`}
+                    <div className="flex items-center rounded-lg hover:bg-surface-2">
+                      <button
+                        type="button"
+                        onClick={() => toggle(t.id)}
+                        className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2 text-left"
                       >
-                        {t.progreso_dominio}%
-                      </span>
-                    </button>
+                        {esta(t.id) ? (
+                          <ChevronDown size={14} className="shrink-0 text-ink-3" aria-hidden />
+                        ) : (
+                          <ChevronRight size={14} className="shrink-0 text-ink-3" aria-hidden />
+                        )}
+                        <span className="truncate text-sm font-medium text-ink">{t.titulo}</span>
+                        {t.capitulo_kanski && (
+                          <span className="hidden shrink-0 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] text-ink-3 sm:inline">
+                            {t.capitulo_kanski}
+                          </span>
+                        )}
+                        <span
+                          className={`ml-auto shrink-0 text-xs font-semibold ${
+                            t.completado ? "text-ok" : t.progreso_dominio > 0 ? "text-warn" : "text-ink-3"
+                          }`}
+                        >
+                          {t.progreso_dominio}%
+                        </span>
+                      </button>
+                      <Link
+                        href={`/temario/${t.id}`}
+                        aria-label={`Leer el tema ${t.titulo}`}
+                        title="Leer el tema"
+                        className="mr-1 rounded-lg p-2 text-ink-3 hover:text-accent"
+                      >
+                        <BookOpen size={15} aria-hidden />
+                      </Link>
+                    </div>
 
                     {esta(t.id) && (
                       <div className="ml-5 border-l border-border pl-3">
@@ -203,7 +206,7 @@ export default function TemarioArbolVista({ arbol }: { arbol: TemarioArbol }) {
                                   <li key={p.id}>
                                     <button
                                       type="button"
-                                      onClick={() => setPunto({ punto: p, bloque: b.titulo })}
+                                      onClick={() => router.push(`/temario/${t.id}?punto=${p.id}`)}
                                       className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px] text-ink hover:bg-accent-dim"
                                     >
                                       <IconoDominio dominio={p.dominio} completado={p.completado} />
@@ -225,98 +228,6 @@ export default function TemarioArbolVista({ arbol }: { arbol: TemarioArbol }) {
         ))}
       </div>
 
-      {punto && (
-        <PuntoModal
-          punto={punto.punto}
-          bloque={punto.bloque}
-          onClose={() => setPunto(null)}
-          onEstudiar={() => estudiar(punto.punto, punto.bloque)}
-        />
-      )}
     </>
-  );
-}
-
-function PuntoModal({
-  punto,
-  bloque,
-  onClose,
-  onEstudiar,
-}: {
-  punto: PuntoArbol;
-  bloque: string;
-  onClose: () => void;
-  onEstudiar: () => void;
-}) {
-  const [fragmentos, setFragmentos] = useState<{ texto: string; fuente: string }[] | null>(null);
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const verContenido = async () => {
-    setCargando(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/temario/contenido", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ titulo: punto.titulo, bloque }),
-      });
-      const json = await res.json();
-      if (!res.ok || json.error) throw new Error(json.error ?? `HTTP ${res.status}`);
-      setFragmentos(json.data.fragmentos);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo cargar el contenido");
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-      <div
-        className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-surface p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 className="font-display text-lg font-semibold text-ink">{punto.titulo}</h2>
-          <button type="button" onClick={onClose} aria-label="Cerrar" className="rounded-lg p-1 text-ink-3 hover:bg-surface-2">
-            <X size={18} aria-hidden />
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onEstudiar}
-            className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-accent-fg hover:bg-accent-2"
-          >
-            <Play size={15} aria-hidden /> Estudiar este punto
-          </button>
-          <button
-            type="button"
-            onClick={() => void verContenido()}
-            disabled={cargando}
-            className="flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm text-ink-2 hover:border-border-2 disabled:opacity-50"
-          >
-            <BookOpen size={15} aria-hidden /> {cargando ? "Buscando…" : "Ver en el temario"}
-          </button>
-        </div>
-
-        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
-        {fragmentos && (
-          <div className="mt-5 flex flex-col gap-3">
-            {fragmentos.length === 0 && (
-              <p className="text-sm text-ink-3">No se encontró contenido específico en el temario para este punto.</p>
-            )}
-            {fragmentos.map((f, i) => (
-              <div key={i} className="rounded-lg border border-border bg-surface-2 p-3">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-accent">{f.fuente}</p>
-                <p className="text-[13px] leading-relaxed text-ink-2">{f.texto}…</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
