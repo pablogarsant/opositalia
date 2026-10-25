@@ -18,7 +18,8 @@ function cacheKey(tema: string, tipo: string): string {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/\s+/g, "-");
-  return `${slug}:${tipo}`;
+  // v2: lectura ya no trae textos (van por punto). Versionar en vez de borrar la caché
+  return `v2:${slug}:${tipo}`;
 }
 
 export async function POST(req: NextRequest) {

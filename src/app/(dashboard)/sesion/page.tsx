@@ -4,6 +4,7 @@ import SesionActiva from "@/components/sesion/SesionActiva";
 import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
 import { elegirSesionActual, hoyMadrid } from "@/lib/plan/sesion-actual";
+import { getTemaLibro } from "@/lib/temario";
 
 interface Props {
   searchParams: Promise<{ id?: string; tema?: string; bloque?: string }>;
@@ -124,6 +125,11 @@ export default async function SesionPage({ searchParams }: Props) {
 
   const tema = tituloSesion(sesion);
   const programadaPara = sesion.fecha_programada === hoy ? undefined : fechaLarga(sesion.fecha_programada);
+  // la lectura de la fase 4 va por los puntos oficiales del tema
+  const libro = sesion.tema_id ? await getTemaLibro(sesion.tema_id, perfil.id) : null;
+  const puntos = (libro?.subtemas ?? []).flatMap((s) =>
+    s.puntos.map((p) => ({ id: p.id, titulo: p.titulo, subtema: s.titulo }))
+  );
 
   return (
     <SesionActiva
@@ -132,6 +138,7 @@ export default async function SesionPage({ searchParams }: Props) {
       temaId={sesion.tema_id}
       sesionPlanId={sesion.id}
       programadaPara={programadaPara}
+      puntos={puntos}
     />
   );
 }

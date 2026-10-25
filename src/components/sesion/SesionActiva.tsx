@@ -12,7 +12,7 @@ import { useChatDetalle } from "@/hooks/useChatDetalle";
 import PhaseRepaso from "./PhaseRepaso";
 import PhaseConceptos from "./PhaseConceptos";
 import PhaseMapa from "./PhaseMapa";
-import PhaseLectura from "./PhaseLectura";
+import PhaseLectura, { type PuntoLectura } from "./PhaseLectura";
 import PhaseExamen from "./PhaseExamen";
 
 interface Props {
@@ -23,6 +23,8 @@ interface Props {
   sesionPlanId?: string;
   // solo si la sesión que toca no es de hoy: fecha legible para avisar
   programadaPara?: string;
+  // puntos del tema para la lectura de la fase 4 (vacío en sesiones libres)
+  puntos?: PuntoLectura[];
 }
 
 interface ContenidoCompleto {
@@ -52,7 +54,14 @@ async function pedirContenido(tema: string, bloque: string, tipo: string, temaId
   return json.data;
 }
 
-export default function SesionActiva({ tema, bloque, temaId = null, sesionPlanId, programadaPara }: Props) {
+export default function SesionActiva({
+  tema,
+  bloque,
+  temaId = null,
+  sesionPlanId,
+  programadaPara,
+  puntos = [],
+}: Props) {
   const { faseActual, setFase } = useSesionStore();
   const [contenido, setContenido] = useState<ContenidoCompleto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -183,7 +192,7 @@ export default function SesionActiva({ tema, bloque, temaId = null, sesionPlanId
         )}
         {faseActual === 3 && <PhaseMapa mapa={contenido.lectura.mapa_mental} onDone={avanzar} />}
         {faseActual === 4 && (
-          <PhaseLectura textos={contenido.lectura.textos} bloque={bloque} onDone={avanzar} />
+          <PhaseLectura puntos={puntos} bloque={bloque} onDone={avanzar} />
         )}
         {faseActual === 5 && (
           <PhaseExamen

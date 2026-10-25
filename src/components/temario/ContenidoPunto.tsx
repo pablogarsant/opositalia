@@ -19,7 +19,7 @@ interface Props {
 }
 
 /** Mapeo de markdown → tipografía de lectura (Lora, tablas de verdad). */
-const COMPONENTES: Components = {
+export const COMPONENTES: Components = {
   table: (props) => (
     <div className="my-6 overflow-x-auto">
       <table className="w-full border-collapse text-sm" {...props} />
