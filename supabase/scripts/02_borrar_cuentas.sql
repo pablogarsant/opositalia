@@ -4,8 +4,8 @@
 --   bloques 2 y 3 para saber qué se va a borrar.
 --
 -- Orden obligatorio: PRIMERO este script en Supabase, DESPUÉS borrar los
--- usuarios en Clerk. Al revés quedan perfiles huérfanos y el webhook choca
--- al recrear a alguien con el mismo email.
+-- usuarios en Clerk. Al revés quedan perfiles huérfanos (clerk_id que ya no
+-- existe en Clerk); perfiles.email no es único, así que recrear no choca.
 --
 -- NO toca contenido: temas, bloques, cursos, subtemas, puntos, documentos,
 -- chunks_rag, sesion_cache, contenido_formateado, relaciones_temas, burocracia_cache.
