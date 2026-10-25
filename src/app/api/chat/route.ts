@@ -28,7 +28,10 @@ export async function POST(req: NextRequest) {
   }
   const { mensaje, contexto, historial } = parsed.data;
 
-  // el simulacro se hace sin ayuda: chatbot bloqueado en fase 5
+  // el simulacro se hace sin ayuda: chatbot bloqueado en fase 5.
+  // ponytail: la fase la declara el cliente; una llamada directa sin fase_sesion
+  // pasa. Aceptado (Fase 8): es práctica personal. Bloqueo real = guardar el
+  // inicio del simulacro en servidor y consultarlo aquí.
   if (contexto.fase_sesion === 5) {
     return NextResponse.json(
       { data: null, error: "El asistente no está disponible durante el simulacro" },
