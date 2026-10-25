@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChevronDown } from "lucide-react";
-import type { FuenteLectura } from "@/app/api/sesion/punto/route";
+import type { Fuente } from "@/lib/contenido/formatear";
 import FavoritoButton from "@/components/shared/FavoritoButton";
+import FuenteLink from "@/components/shared/FuenteLink";
 import { COMPONENTES } from "@/components/temario/ContenidoPunto";
 
 export interface PuntoLectura {
@@ -23,7 +24,7 @@ interface Props {
 /** Texto de un punto: se pide al abrirlo y se pinta según llega el stream. */
 function LecturaPunto({ punto, bloque }: { punto: PuntoLectura; bloque: string }) {
   const [markdown, setMarkdown] = useState("");
-  const [fuentes, setFuentes] = useState<FuenteLectura[]>([]);
+  const [fuentes, setFuentes] = useState<Fuente[]>([]);
   const [estado, setEstado] = useState<"cargando" | "listo" | "error">("cargando");
   const [error, setError] = useState<string | null>(null);
 
@@ -77,9 +78,8 @@ function LecturaPunto({ punto, bloque }: { punto: PuntoLectura; bloque: string }
           {fuentes.length > 0 && (
             <ul className="text-xs text-ink-3">
               {fuentes.map((f) => (
-                <li key={f.chunk_id}>
-                  {f.documento}
-                  {f.pagina && ` · ${f.pagina}`}
+                <li key={`${f.documento}|${f.pagina ?? ""}`}>
+                  <FuenteLink fuente={f} />
                 </li>
               ))}
             </ul>

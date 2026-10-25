@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { lecturaValida, streamLecturaPunto, type ParteTemario } from "@/lib/anthropic/sesion";
-import { fuentesDeChunks } from "@/lib/contenido/formatear";
+import { fuentesDeChunks, type Fuente } from "@/lib/contenido/formatear";
 import { buscarParaLectura, formatearContexto } from "@/lib/rag";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -10,16 +10,9 @@ export const maxDuration = 120;
 
 const bodySchema = z.object({ punto_id: z.string().uuid() });
 
-/** Fuente de la lectura: chunk literal (Fase 6 lo abre por chunk_id) + documento y páginas. */
-export interface FuenteLectura {
-  chunk_id: string;
-  documento: string;
-  pagina?: string;
-}
-
 interface CacheLectura {
   markdown: string;
-  fuentes: FuenteLectura[];
+  fuentes: Fuente[];
 }
 
 const errorJson = (error: string, status: number) => NextResponse.json({ data: null, error }, { status });
@@ -48,7 +41,7 @@ export async function POST(req: NextRequest) {
   if (tema.error) return errorJson(`Tema del punto ${puntoId}: ${tema.error.message}`, 500);
   const parte: ParteTemario = tema.data.parte === "comun" ? "comun" : "especifica";
 
-  const cabeceras = (fuentes: FuenteLectura[]) => ({
+  const cabeceras = (fuentes: Fuente[]) => ({
     "Content-Type": "text/markdown; charset=utf-8",
     "Cache-Control": "no-cache, no-transform",
     "X-Fuentes": encodeURIComponent(JSON.stringify(fuentes)),
@@ -68,7 +61,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     return errorJson(`RAG del punto ${puntoId}: ${e instanceof Error ? e.message : e}`, 502);
   }
-  const fuentes: FuenteLectura[] = chunks.map((c) => ({ chunk_id: c.id!, ...fuentesDeChunks([c])[0] }));
+  const fuentes = fuentesDeChunks(chunks);
 
   const stream = streamLecturaPunto({
     tema: tema.data.titulo,
