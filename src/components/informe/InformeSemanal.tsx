@@ -153,6 +153,13 @@ export default function InformeSemanal() {
               </button>
               <button
                 type="button"
+                onClick={() => router.push("/temario?vista=grafo")}
+                className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-ink-2 hover:border-border-2"
+              >
+                Ver temario
+              </button>
+              <button
+                type="button"
                 onClick={() => void anadirRefuerzo(modal.bloque_id)}
                 disabled={anadiendo}
                 className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-ink-2 hover:border-border-2 disabled:opacity-50"

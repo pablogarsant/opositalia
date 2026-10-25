@@ -126,3 +126,120 @@ export async function getTemarioArbol(perfilId: string | null): Promise<TemarioA
     disponible: true,
   };
 }
+
+export interface TemaLibro {
+  id: string;
+  numero: number | null;
+  titulo: string;
+  parte: string | null;
+  capitulo_kanski: string | null;
+  bloque_id: string | null;
+  bloque_titulo: string;
+  progreso_dominio: number;
+  subtemas: SubtemaArbol[];
+}
+
+/**
+ * Un tema completo (subtemas + puntos + dominio) para la vista libro.
+ * Devuelve null si el tema no existe.
+ */
+export async function getTemaLibro(
+  temaId: string,
+  perfilId: string | null
+): Promise<TemaLibro | null> {
+  const sb = supabaseAdmin();
+
+  const tema = await sb
+    .from("temas")
+    .select("id, bloque_id, titulo, numero_boja, parte, capitulo_kanski")
+    .eq("id", temaId)
+    .maybeSingle();
+  if (tema.error || !tema.data) return null;
+
+  const [bloque, subtemas] = await Promise.all([
+    tema.data.bloque_id
+      ? sb.from("bloques").select("titulo").eq("id", tema.data.bloque_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    sb.from("subtemas").select("id, titulo, orden").eq("tema_id", temaId).order("orden"),
+  ]);
+
+  const subIds = (subtemas.data ?? []).map((s) => s.id);
+  const puntos = subIds.length
+    ? await sb
+        .from("puntos")
+        .select("id, subtema_id, titulo, orden, keywords")
+        .in("subtema_id", subIds)
+        .order("orden")
+    : { data: [] as { id: string; subtema_id: string; titulo: string; orden: number; keywords: string[] | null }[] };
+
+  const dominioPorPunto = new Map<string, number>();
+  if (perfilId && puntos.data?.length) {
+    const prog = await sb
+      .from("progreso_puntos")
+      .select("punto_id, dominio")
+      .eq("perfil_id", perfilId)
+      .in(
+        "punto_id",
+        puntos.data.map((p) => p.id)
+      );
+    for (const p of prog.data ?? []) dominioPorPunto.set(p.punto_id, p.dominio);
+  }
+
+  const porSubtema = new Map<string, PuntoArbol[]>();
+  for (const p of puntos.data ?? []) {
+    if (!p.subtema_id) continue;
+    const dominio = dominioPorPunto.get(p.id) ?? 0;
+    const arr = porSubtema.get(p.subtema_id) ?? [];
+    arr.push({
+      id: p.id,
+      titulo: p.titulo,
+      orden: p.orden,
+      keywords: p.keywords ?? [],
+      dominio,
+      completado: dominio >= DOMINIO_COMPLETADO,
+    });
+    porSubtema.set(p.subtema_id, arr);
+  }
+
+  const subs: SubtemaArbol[] = (subtemas.data ?? []).map((s) => ({
+    id: s.id,
+    titulo: s.titulo,
+    orden: s.orden,
+    puntos: porSubtema.get(s.id) ?? [],
+  }));
+  const todos = subs.flatMap((s) => s.puntos);
+
+  return {
+    id: tema.data.id,
+    numero: tema.data.numero_boja ?? null,
+    titulo: tema.data.titulo,
+    parte: tema.data.parte ?? null,
+    capitulo_kanski: tema.data.capitulo_kanski ?? null,
+    bloque_id: tema.data.bloque_id ?? null,
+    bloque_titulo: (bloque.data as { titulo?: string } | null)?.titulo ?? "Temario",
+    progreso_dominio: todos.length
+      ? Math.round(todos.reduce((a, p) => a + p.dominio, 0) / todos.length)
+      : 0,
+    subtemas: subs,
+  };
+}
+
+export interface RelacionTema {
+  tema_a_id: string;
+  tema_b_id: string;
+  peso: number;
+  motivo: string | null;
+}
+
+/** Aristas temáticas del grafo. Array vacío si la migración 0008 no está aplicada. */
+export async function getRelacionesTemas(): Promise<RelacionTema[]> {
+  try {
+    const r = await supabaseAdmin()
+      .from("relaciones_temas")
+      .select("tema_a_id, tema_b_id, peso, motivo");
+    if (r.error) return [];
+    return (r.data ?? []).map((x) => ({ ...x, peso: Number(x.peso ?? 0.5) }));
+  } catch {
+    return [];
+  }
+}

@@ -254,9 +254,38 @@ export type BurocraciaCacheRow = {
   updated_at: string;
 };
 
+export type ContenidoFormateadoRow = {
+  id: string;
+  punto_id: string | null;
+  subtema_id: string | null;
+  contenido_md: string;
+  fuentes: { documento: string; pagina?: string }[] | null;
+  generado_en: string;
+};
+
+export type RelacionTemaRow = {
+  id: string;
+  tema_a_id: string;
+  tema_b_id: string;
+  peso: number;
+  motivo: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
+      contenido_formateado: {
+        Row: ContenidoFormateadoRow;
+        Insert: Omit<ContenidoFormateadoRow, "id" | "generado_en"> & { id?: string };
+        Update: Partial<Omit<ContenidoFormateadoRow, "id">>;
+        Relationships: [];
+      };
+      relaciones_temas: {
+        Row: RelacionTemaRow;
+        Insert: Omit<RelacionTemaRow, "id"> & { id?: string };
+        Update: Partial<Omit<RelacionTemaRow, "id">>;
+        Relationships: [];
+      };
       perfiles: {
         Row: PerfilRow;
         Insert: PerfilInsert;

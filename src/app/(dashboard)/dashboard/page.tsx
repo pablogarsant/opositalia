@@ -136,13 +136,22 @@ export default async function DashboardPage() {
                 {sesionHoy.es_refuerzo && " · refuerzo"}
               </p>
             </div>
-            <Link
-              href={`/sesion?tema=${encodeURIComponent(sesionHoy.tema_titulo ?? sesionHoy.bloque_titulo ?? "")}&bloque=${encodeURIComponent(sesionHoy.bloque_titulo ?? "")}`}
-              className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-2"
-            >
-              <Play size={16} aria-hidden />
-              Empezar sesión
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                href={`/sesion?tema=${encodeURIComponent(sesionHoy.tema_titulo ?? sesionHoy.bloque_titulo ?? "")}&bloque=${encodeURIComponent(sesionHoy.bloque_titulo ?? "")}`}
+                className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-2"
+              >
+                <Play size={16} aria-hidden />
+                Empezar sesión
+              </Link>
+              <Link
+                href={sesionHoy.tema_id ? `/temario/${sesionHoy.tema_id}` : "/temario"}
+                className="flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-ink-2 transition-colors hover:border-border-2"
+              >
+                <BookOpen size={16} aria-hidden />
+                Ver temario
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-4">

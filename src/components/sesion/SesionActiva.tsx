@@ -8,7 +8,7 @@ import type {
   ContenidoRepaso,
 } from "@/lib/anthropic/sesion";
 import { useSesionStore } from "@/stores/sesionStore";
-import ChatWidget from "@/components/chat/ChatWidget";
+import { useChatDetalle } from "@/hooks/useChatDetalle";
 import PhaseRepaso from "./PhaseRepaso";
 import PhaseConceptos from "./PhaseConceptos";
 import PhaseMapa from "./PhaseMapa";
@@ -52,6 +52,9 @@ export default function SesionActiva({ tema, bloque }: Props) {
   const [contenido, setContenido] = useState<ContenidoCompleto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [faseMax, setFaseMax] = useState(1);
+
+  // el consultor global vive en el layout: aquí solo se publica qué se estudia
+  useChatDetalle({ tema_titulo: tema, bloque });
 
   const cargar = useCallback(async () => {
     try {
@@ -181,9 +184,6 @@ export default function SesionActiva({ tema, bloque }: Props) {
           />
         )}
       </section>
-
-      {/* consultor IA: disponible fases 1-4, bloqueado en el simulacro */}
-      <ChatWidget tema={tema} bloque={bloque} fase={faseActual} />
     </>
   );
 }
