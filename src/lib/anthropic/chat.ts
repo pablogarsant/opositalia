@@ -98,15 +98,25 @@ export async function streamChatConRag(params: {
   const foco = contexto.punto_titulo ?? contexto.tema_titulo ?? null;
   const consulta = foco ? `${mensaje}\n(contexto: ${foco})` : mensaje;
 
+  // el chat responde igual sin RAG o sin burocracia, pero el fallo queda en el log
+  const sinEso =
+    <T,>(que: string, valor: T) =>
+    (e: unknown): T => {
+      console.error(`chat: ${que} falló, se responde sin ello:`, e instanceof Error ? e.message : e);
+      return valor;
+    };
+
   const [chunksIniciales, burocracia] = await Promise.all([
-    searchRag(consulta, bloque, 6).catch(() => []),
-    preguntaDeConvocatoria(mensaje) ? getBurocracia().catch(() => null) : Promise.resolve(null),
+    searchRag(consulta, bloque, 6).catch(sinEso(`searchRag bloque=${bloque ?? "-"}`, [])),
+    preguntaDeConvocatoria(mensaje)
+      ? getBurocracia().catch(sinEso("getBurocracia", null))
+      : Promise.resolve(null),
   ]);
 
   let chunks = chunksIniciales;
   if (chunks.length === 0 && bloque) {
     // el tema puede estar cubierto por otro bloque del corpus
-    chunks = await searchRag(consulta, null, 6).catch(() => []);
+    chunks = await searchRag(consulta, null, 6).catch(sinEso("searchRag sin bloque", []));
   }
   const referencia = formatearContexto(chunks);
 
