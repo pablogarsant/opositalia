@@ -1,27 +1,44 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Lock, MessageCircle, Send, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-
-interface Props {
-  tema: string;
-  bloque: string;
-  fase: number;
-}
+import remarkGfm from "remark-gfm";
+import { useUIStore } from "@/stores/uiStore";
+import { useSesionStore } from "@/stores/sesionStore";
 
 interface Mensaje {
   role: "user" | "assistant";
   content: string;
 }
 
-export default function ChatWidget({ tema, bloque, fase }: Props) {
-  const [abierto, setAbierto] = useState(false);
+/** Nombre de pantalla que entiende el system prompt (deriva de la ruta). */
+export function pantallaDesdeRuta(pathname: string): string {
+  return pathname.split("/").filter(Boolean)[0] ?? "dashboard";
+}
+
+/**
+ * Consultor IA global: vive en el layout del dashboard, así que aparece en
+ * todas las pantallas. Único bloqueo: fase 5 (simulacro) dentro de /sesion.
+ */
+export default function ChatWidget() {
+  const pathname = usePathname();
+  const pantalla = pantallaDesdeRuta(pathname);
+  const abierto = useUIStore((s) => s.chatAbierto);
+  const setAbierto = useUIStore((s) => s.setChatAbierto);
+  const detalle = useUIStore((s) => s.chatDetalle);
+  const faseSesion = useSesionStore((s) => s.faseActual);
+
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);
   const [input, setInput] = useState("");
   const [generando, setGenerando] = useState(false);
+  const [aviso, setAviso] = useState(false);
   const finRef = useRef<HTMLDivElement>(null);
-  const bloqueado = fase === 5;
+
+  // la fase solo cuenta como contexto si de verdad estamos en la sesión
+  const enSesion = pantalla === "sesion";
+  const bloqueado = enSesion && faseSesion === 5;
 
   useEffect(() => {
     finRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,13 +50,25 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
     setInput("");
     setGenerando(true);
     const historial = mensajes.slice(-10);
-    setMensajes((prev) => [...prev, { role: "user", content: mensaje }, { role: "assistant", content: "" }]);
+    setMensajes((prev) => [
+      ...prev,
+      { role: "user", content: mensaje },
+      { role: "assistant", content: "" },
+    ]);
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensaje, tema_actual: tema, bloque, fase, historial }),
+        body: JSON.stringify({
+          mensaje,
+          historial,
+          contexto: {
+            pantalla,
+            ...(detalle ?? {}),
+            ...(enSesion ? { fase_sesion: faseSesion } : {}),
+          },
+        }),
       });
       if (!res.ok || !res.body) {
         const json = await res.json().catch(() => null);
@@ -88,14 +117,17 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
     }
   };
 
+  const subtitulo = detalle?.punto_titulo ?? detalle?.tema_titulo ?? "Pregúntame lo que quieras";
+
   return (
-    <div className="fixed bottom-5 right-5 z-50">
-      {abierto && (
-        <div className="mb-3 flex h-[420px] w-80 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
+    // z-40: por encima de la UI, por debajo de los modales (z-50)
+    <div className="fixed bottom-5 right-4 z-40 flex flex-col items-end md:right-6">
+      {abierto && !bloqueado && (
+        <div className="chat-panel-in mb-3 flex h-[min(560px,calc(100dvh-7rem))] w-[calc(100vw-2rem)] max-w-[380px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl sm:w-[380px]">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-ink">Consultor OIR</p>
-              <p className="text-[11px] text-ink-3">{bloqueado ? "Bloqueado en simulacro" : tema}</p>
+              <p className="truncate text-[11px] text-ink-3">{subtitulo}</p>
             </div>
             <button
               type="button"
@@ -109,8 +141,9 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
 
           <div className="flex-1 overflow-y-auto p-3">
             {mensajes.length === 0 && (
-              <p className="p-4 text-center text-[13px] text-ink-3">
-                Pregunta cualquier duda del tema: respondo con el contexto del Kanski.
+              <p className="p-4 text-center text-[13px] leading-relaxed text-ink-3">
+                Pregúntame lo que necesites: temario, dudas clínicas, cómo funciona Opositalia o
+                datos de la convocatoria.
               </p>
             )}
             <div className="flex flex-col gap-2.5">
@@ -124,8 +157,9 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
                   }`}
                 >
                   {m.role === "assistant" ? (
-                    <div className="flex flex-col gap-2 [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_strong]:font-semibold">
+                    <div className="flex flex-col gap-2 [&_li]:ml-4 [&_li]:list-disc [&_ol_li]:list-decimal [&_strong]:font-semibold [&_table]:w-full [&_td]:border-b [&_td]:border-border [&_td]:py-1 [&_th]:border-b [&_th]:border-border [&_th]:py-1 [&_th]:text-left">
                       <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
                         components={{
                           // sin jerarquía de headings dentro del chat
                           h1: ({ children }) => <p className="font-semibold">{children}</p>,
@@ -150,15 +184,15 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && void enviar()}
-              disabled={bloqueado || generando}
-              placeholder={bloqueado ? "No disponible en el simulacro" : "Escribe tu duda…"}
+              disabled={generando}
+              placeholder="Escribe tu duda…"
               aria-label="Mensaje al consultor"
               className="min-w-0 flex-1 rounded-lg border border-border bg-surface-2 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-accent disabled:opacity-50"
             />
             <button
               type="button"
               onClick={() => void enviar()}
-              disabled={bloqueado || generando || !input.trim()}
+              disabled={generando || !input.trim()}
               aria-label="Enviar"
               className="rounded-lg bg-accent p-2.5 text-accent-fg hover:bg-accent-2 disabled:opacity-50"
             >
@@ -168,15 +202,31 @@ export default function ChatWidget({ tema, bloque, fase }: Props) {
         </div>
       )}
 
+      {bloqueado && aviso && (
+        <p
+          role="status"
+          className="mb-3 max-w-56 rounded-xl border border-border bg-surface px-3 py-2 text-[13px] text-ink-2 shadow-lg"
+        >
+          El asistente no está disponible durante el simulacro.
+        </p>
+      )}
+
       <button
         type="button"
-        onClick={() => setAbierto((v) => !v)}
+        onClick={() => (bloqueado ? setAviso((v) => !v) : setAbierto(!abierto))}
         aria-label={bloqueado ? "Consultor bloqueado durante el simulacro" : "Abrir consultor IA"}
-        className={`ml-auto flex h-13 w-13 items-center justify-center rounded-full p-3.5 shadow-lg transition-transform hover:scale-105 ${
+        aria-expanded={abierto && !bloqueado}
+        className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 ${
           bloqueado ? "bg-surface-2 text-ink-3" : "bg-accent text-accent-fg"
         }`}
       >
-        {bloqueado ? <Lock size={20} aria-hidden /> : <MessageCircle size={22} aria-hidden />}
+        {bloqueado ? (
+          <Lock size={20} aria-hidden />
+        ) : abierto ? (
+          <X size={22} aria-hidden />
+        ) : (
+          <MessageCircle size={22} aria-hidden />
+        )}
       </button>
     </div>
   );

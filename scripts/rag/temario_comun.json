@@ -1,0 +1,339 @@
+[
+  {
+    "numero": 1,
+    "titulo": "Constitución Española 1978",
+    "puntos": [
+      "Libertad",
+      "Justicia",
+      "Igualdad",
+      "Pluralismo político",
+      "Derecho a la vida",
+      "Derecho a la integridad",
+      "Derecho a la protección de la salud (art. 43)",
+      "Jefatura del Estado",
+      "Cortes Generales",
+      "Gobierno",
+      "Poder Judicial"
+    ]
+  },
+  {
+    "numero": 2,
+    "titulo": "Estatuto de Autonomía de Andalucía",
+    "puntos": [
+      "Competencias de la Junta",
+      "Principios generales",
+      "Derechos en materia de salud",
+      "Deberes ciudadanos",
+      "Políticas públicas sanitarias",
+      "Sanidad",
+      "Farmacia",
+      "Salud pública",
+      "Parlamento andaluz",
+      "Consejo de Gobierno",
+      "Defensor del Pueblo Andaluz"
+    ]
+  },
+  {
+    "numero": 3,
+    "titulo": "Organización sanitaria I — Ley General de Sanidad",
+    "puntos": [
+      "Principios generales",
+      "Competencias de las AAPP",
+      "Estructura del sistema sanitario público",
+      "Organización general",
+      "Ley 2/1998 de Salud de Andalucía",
+      "Derechos y deberes de los ciudadanos",
+      "Plan Andaluz de Salud",
+      "Planes marco y Estrategias vigentes",
+      "Contrato Programa"
+    ]
+  },
+  {
+    "numero": 4,
+    "titulo": "Organización sanitaria II — Estructura SAS",
+    "puntos": [
+      "Estructura y organización",
+      "Competencias",
+      "Atención Primaria",
+      "Atención Especializada",
+      "Concepto y organización",
+      "Hospitales públicos andaluces",
+      "Salud Mental",
+      "Trasplantes",
+      "Urgencias",
+      "Red Andaluza de Medicina Transfusional",
+      "Biobanco del SSPA"
+    ]
+  },
+  {
+    "numero": 5,
+    "titulo": "Protección de datos y transparencia",
+    "puntos": [
+      "Disposiciones generales",
+      "Principios de protección de datos",
+      "Derechos de las personas (acceso, rectificación, supresión, portabilidad)",
+      "Principios básicos",
+      "Publicidad activa",
+      "Derecho de acceso a la información pública"
+    ]
+  },
+  {
+    "numero": 6,
+    "titulo": "Prevención de riesgos laborales",
+    "puntos": [
+      "Derechos y obligaciones",
+      "Consulta y participación de los trabajadores",
+      "Principios de la acción preventiva",
+      "Unidades de Prevención en Centros Asistenciales",
+      "Delegados de Prevención",
+      "Comité de Seguridad y Salud"
+    ]
+  },
+  {
+    "numero": 7,
+    "titulo": "Igualdad de género y violencia",
+    "puntos": [
+      "Objeto y ámbito",
+      "Principios generales",
+      "Políticas públicas de igualdad",
+      "Objeto y ámbito",
+      "Formación a profesionales de la salud",
+      "Plan de igualdad de la Junta de Andalucía"
+    ]
+  },
+  {
+    "numero": 8,
+    "titulo": "Estatuto Marco del personal estatutario",
+    "puntos": [
+      "Clasificación del personal estatutario",
+      "Derechos y deberes",
+      "Adquisición y pérdida de condición de fijo",
+      "Provisión de plazas",
+      "Selección y promoción interna",
+      "Movilidad",
+      "Carrera profesional",
+      "Retribuciones",
+      "Jornadas, permisos y licencias",
+      "Situaciones del personal",
+      "Régimen disciplinario",
+      "Incompatibilidades"
+    ]
+  },
+  {
+    "numero": 9,
+    "titulo": "Autonomía del paciente y documentación clínica",
+    "puntos": [
+      "Derecho a la información sanitaria",
+      "Derecho a la intimidad",
+      "Consentimiento informado",
+      "Definición y contenido",
+      "Acceso a la historia clínica",
+      "Custodia y conservación",
+      "Informe de alta",
+      "Tarjeta sanitaria de Andalucía",
+      "Voluntad anticipada"
+    ]
+  },
+  {
+    "numero": 10,
+    "titulo": "TIC en el SAS y ciberseguridad",
+    "puntos": [
+      "Puesto de trabajo digital",
+      "Ayuda Digital",
+      "Historia Clínica Digital (Diraya)",
+      "Principios de seguridad de la información",
+      "Código de conducta TIC en la Junta de Andalucía"
+    ]
+  },
+  {
+    "numero": 11,
+    "titulo": "Sistema Nacional de Salud",
+    "puntos": [
+      "Disposiciones generales",
+      "Prestaciones del SNS",
+      "Profesionales del SNS",
+      "Consejo Interterritorial",
+      "INCLASNS-BD",
+      "Indicadores clave actualizados"
+    ]
+  },
+  {
+    "numero": 12,
+    "titulo": "Salud Pública",
+    "puntos": [
+      "Objeto y principios",
+      "One Health — una sola salud",
+      "AVISTA: Vigilancia y Respuesta en Salud Pública",
+      "EDOs (Enfermedades de Declaración Obligatoria)",
+      "Indicadores demográficos: mortalidad, morbilidad, incidencia, prevalencia",
+      "Indicadores de salud: clasificación y utilidad"
+    ]
+  },
+  {
+    "numero": 13,
+    "titulo": "Derechos y garantías de ciudadanos en el SSPA",
+    "puntos": [
+      "Tiempos de respuesta asistencial",
+      "Libre elección",
+      "Segunda opinión médica",
+      "Derechos en el proceso de muerte",
+      "Voluntad anticipada y Registro de VVA",
+      "Derecho a la eutanasia en España y Andalucía",
+      "Ley para personas trans y LGTBI: medidas en salud",
+      "Reproducción asistida e IVE"
+    ]
+  },
+  {
+    "numero": 14,
+    "titulo": "Calidad en el sistema sanitario",
+    "puntos": [
+      "Instrumentos de evaluación y mejora continua",
+      "Comisiones de Calidad y Grupos de Mejora",
+      "Acreditación de centros, servicios y unidades",
+      "Estrategia para la Seguridad del Paciente en Andalucía"
+    ]
+  },
+  {
+    "numero": 15,
+    "titulo": "Formación y desarrollo profesional",
+    "puntos": [
+      "Formación Sanitaria Especializada (FSE)",
+      "Plan Estratégico de Formación del SSPA",
+      "Modelo de Acreditación de Competencias Profesionales",
+      "Modelo de Carrera Profesional en el SSPA"
+    ]
+  },
+  {
+    "numero": 16,
+    "titulo": "Gestión sanitaria",
+    "puntos": [
+      "Equidad, eficacia, eficiencia y efectividad",
+      "Tipos de estudios de evaluación económica",
+      "Financiación, gestión y provisión de servicios",
+      "INFOWEB",
+      "Base Poblacional de Salud (BPS)",
+      "CMBD",
+      "Contabilidad Analítica (COAN)",
+      "Case-Mix",
+      "CIE y CIAP"
+    ]
+  },
+  {
+    "numero": 17,
+    "titulo": "Gestión clínica",
+    "puntos": [
+      "Beneficios, daños y costes",
+      "Test diagnósticos y de cribado",
+      "Guías de práctica clínica (GPC)",
+      "GuiaSalud",
+      "Procesos Asistenciales Integrados (PAIs)",
+      "Mapa de Procesos del SSPA",
+      "Historia Clínica Digital — Diraya",
+      "Acuerdo de Gestión"
+    ]
+  },
+  {
+    "numero": 18,
+    "titulo": "Educación y Promoción de la Salud",
+    "puntos": [
+      "Conceptos básicos",
+      "Estrategias y metodologías",
+      "Intervención educativa desde la consulta",
+      "El consejo médico",
+      "Sistemas de participación y empoderamiento del paciente",
+      "Escuelas de pacientes",
+      "Comunicación sanitaria"
+    ]
+  },
+  {
+    "numero": 19,
+    "titulo": "Estadística para la gestión clínica",
+    "puntos": [
+      "Medidas de tendencia central y dispersión",
+      "Error aleatorio",
+      "Test de hipótesis",
+      "Significación estadística",
+      "Pruebas análisis bivariante",
+      "Análisis multivariante",
+      "Curvas de supervivencia"
+    ]
+  },
+  {
+    "numero": 20,
+    "titulo": "Investigación en biomedicina",
+    "puntos": [
+      "Principales diseños en investigación clínica y epidemiológica",
+      "Sesgos y variables confundentes",
+      "El protocolo de investigación",
+      "Big-data en salud",
+      "Inteligencia Artificial en atención sanitaria",
+      "Comunicación y publicación científica"
+    ]
+  },
+  {
+    "numero": 21,
+    "titulo": "Regulación ética y legal de la investigación",
+    "puntos": [
+      "Ley 14/2007 de investigación biomédica",
+      "Regulación del acceso y uso de datos",
+      "Instrucciones ordenación del acceso SSPA (Resolución 1/2021)",
+      "Plataforma BIGDATA de la FPS",
+      "Biobanco del SSPA",
+      "Comités de Ética de la Investigación en Andalucía"
+    ]
+  },
+  {
+    "numero": 22,
+    "titulo": "Medicina Basada en la Evidencia",
+    "puntos": [
+      "Búsqueda bibliográfica eficiente",
+      "Lectura crítica de artículos científicos",
+      "Revisiones sistemáticas y meta-análisis",
+      "GPC basadas en evidencia",
+      "Recursos disponibles en el SSPA",
+      "Biblioteca Virtual del SSPA"
+    ]
+  },
+  {
+    "numero": 23,
+    "titulo": "Ética y profesionalismo médico",
+    "puntos": [
+      "Autonomía",
+      "Beneficencia",
+      "No maleficencia",
+      "Justicia",
+      "Código Deontológico médico vigente",
+      "Análisis de conflictos éticos en la práctica clínica",
+      "Humanización de la asistencia",
+      "Comités de Ética Asistencial",
+      "Responsabilidad profesional en el SAS"
+    ]
+  },
+  {
+    "numero": 24,
+    "titulo": "El acto clínico",
+    "puntos": [
+      "La entrevista clínica",
+      "Conceptos básicos de clinimetría",
+      "Aplicación e interpretación de pruebas diagnósticas",
+      "Medición de la Calidad de Vida Relacionada con la Salud",
+      "Instrumentos para incorporar preferencias del paciente",
+      "Toma compartida de decisiones"
+    ]
+  },
+  {
+    "numero": 25,
+    "titulo": "Uso racional de medicamentos",
+    "puntos": [
+      "Principios del uso racional del medicamento",
+      "Prescripción por principio activo y genérico",
+      "Herramientas para mejorar la adherencia terapéutica",
+      "Receta electrónica",
+      "PRM y polimedicación",
+      "Informes de Posicionamiento Terapéutico (AEMPS)",
+      "Visado",
+      "Medicamentos ECM, DH y H",
+      "Notificación de reacciones adversas (RAM)"
+    ]
+  }
+]

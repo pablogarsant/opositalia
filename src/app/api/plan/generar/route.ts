@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generarSesiones, type BloquePlan } from "@/lib/plan/generador";
+import { cargarBloquesPlan, insertarSesiones, resumenPlan } from "@/lib/plan/motor";
 import { getPerfil } from "@/lib/perfil";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -91,29 +92,12 @@ export async function POST(req: NextRequest) {
     inscripcionId = ins.data.id;
   }
 
-  // temario ordenado
-  const bloquesRes = await sb
-    .from("bloques")
-    .select("id, titulo, orden")
-    .eq("curso_id", curso.data.id)
-    .order("orden");
-  const temasRes = await sb
-    .from("temas")
-    .select("id, titulo, orden, horas_estimadas, bloque_id")
-    .order("orden");
-  if (!bloquesRes.data?.length || !temasRes.data?.length) {
-    return NextResponse.json(
-      { data: null, error: "Temario vacío: ejecuta el seed del temario" },
-      { status: 409 }
-    );
+  let bloques: BloquePlan[];
+  try {
+    bloques = await cargarBloquesPlan(sb, curso.data.id);
+  } catch (e) {
+    return NextResponse.json({ data: null, error: e instanceof Error ? e.message : String(e) }, { status: 409 });
   }
-  const bloques: BloquePlan[] = bloquesRes.data.map((b) => ({
-    id: b.id,
-    titulo: b.titulo,
-    temas: (temasRes.data ?? [])
-      .filter((t) => t.bloque_id === b.id)
-      .map((t) => ({ id: t.id, titulo: t.titulo, horas: Number(t.horas_estimadas) || 2 })),
-  }));
 
   const sesiones = generarSesiones({
     bloques,
@@ -121,13 +105,10 @@ export async function POST(req: NextRequest) {
     fechaInicio: new Date(),
   });
 
-  // insert en lotes de 100
-  for (let i = 0; i < sesiones.length; i += 100) {
-    const lote = sesiones.slice(i, i + 100).map((s) => ({ ...s, inscripcion_id: inscripcionId! }));
-    const ins = await sb.from("sesiones_plan").insert(lote);
-    if (ins.error) {
-      return NextResponse.json({ data: null, error: ins.error.message }, { status: 500 });
-    }
+  try {
+    await insertarSesiones(sb, inscripcionId!, sesiones);
+  } catch (e) {
+    return NextResponse.json({ data: null, error: e instanceof Error ? e.message : String(e) }, { status: 500 });
   }
 
   // progreso inicial de cada tema (idempotente vía ignoreDuplicates)
@@ -148,20 +129,8 @@ export async function POST(req: NextRequest) {
     ? "Plan creado, pero falta la migración 0004 (onboarding_completado)"
     : null;
 
-  const fechaFin = sesiones[sesiones.length - 1]?.fecha_programada;
-  const semanas = Math.ceil(
-    (new Date(fechaFin).getTime() - Date.now()) / (7 * 24 * 3600 * 1000)
-  );
-
   return NextResponse.json({
-    data: {
-      total_sesiones: sesiones.length,
-      semanas,
-      fecha_inicio: sesiones[0]?.fecha_programada,
-      fecha_fin: fechaFin,
-      cabe_antes_del_examen: fechaFin <= fecha_examen,
-      aviso: avisoMigracion,
-    },
+    data: { ...resumenPlan(sesiones, fecha_examen), aviso: avisoMigracion },
     error: null,
   });
 }

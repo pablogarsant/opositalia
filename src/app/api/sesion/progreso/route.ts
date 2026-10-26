@@ -9,6 +9,8 @@ const bodySchema = z.object({
   tema_id: z.string().uuid().nullish(),
   bloque_id: z.string().uuid().nullish(),
   bloque: z.string().max(100).nullish(),
+  // sesión del plan que se completa; null = sesión libre (refuerzo del informe)
+  sesion_plan_id: z.string().uuid().nullish(),
   correctas: z.number().int().min(0),
   total: z.number().int().min(1),
   duracion_seg: z.number().int().min(0).default(0),
@@ -41,14 +43,44 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ data: null, error: "Body inválido" }, { status: 400 });
   }
-  const { tema_id, bloque_id, bloque, correctas, total, duracion_seg, respuestas } = parsed.data;
+  const { tema_id, bloque_id, bloque, sesion_plan_id, correctas, total, duracion_seg, respuestas } =
+    parsed.data;
   const dominio = Math.round((correctas / total) * 100);
   const sb = supabaseAdmin();
+
+  // el id llega del cliente: solo vale si es de la inscripción activa de esta usuaria
+  if (sesion_plan_id) {
+    const inscripcion = await sb
+      .from("inscripciones")
+      .select("id")
+      .eq("perfil_id", perfil.id)
+      .eq("activa", true)
+      .maybeSingle();
+    const propia = inscripcion.data
+      ? await sb
+          .from("sesiones_plan")
+          .select("id")
+          .eq("id", sesion_plan_id)
+          .eq("inscripcion_id", inscripcion.data.id)
+          .maybeSingle()
+      : null;
+    if (inscripcion.error || propia?.error) {
+      const msg = inscripcion.error?.message ?? propia?.error?.message;
+      return NextResponse.json({ data: null, error: `Error validando sesion_plan_id: ${msg}` }, { status: 500 });
+    }
+    if (!propia?.data) {
+      return NextResponse.json(
+        { data: null, error: `sesion_plan_id=${sesion_plan_id} no pertenece al plan activo` },
+        { status: 403 }
+      );
+    }
+  }
 
   const sesion = await sb
     .from("sesiones_estudio")
     .insert({
       perfil_id: perfil.id,
+      sesion_plan_id: sesion_plan_id ?? null,
       tema_id: tema_id ?? null,
       fase_actual: 5,
       completada: true,
@@ -62,8 +94,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: null, error: sesion.error.message }, { status: 500 });
   }
 
+  // completar las 5 fases cierra la sesión del plan: dashboard y sidebar pasan a la siguiente
+  if (sesion_plan_id) {
+    const cierre = await sb
+      .from("sesiones_plan")
+      .update({ estado: "completada" })
+      .eq("id", sesion_plan_id);
+    if (cierre.error) {
+      return NextResponse.json(
+        { data: null, error: `Sesión guardada pero sesiones_plan no pasó a completada: ${cierre.error.message}` },
+        { status: 500 }
+      );
+    }
+  }
+
   if (respuestas.length) {
-    await sb.from("respuestas_examen").insert(
+    const insercion = await sb.from("respuestas_examen").insert(
       respuestas.map((r) => ({
         sesion_id: sesion.data.id,
         pregunta_texto: r.pregunta,
@@ -73,6 +119,8 @@ export async function POST(req: NextRequest) {
         bloque: bloque ?? null,
       }))
     );
+    // no bloquea la respuesta (el dominio ya está calculado), pero deja rastro
+    if (insercion.error) console.error(`respuestas_examen sesion=${sesion.data.id}:`, insercion.error.message);
   }
 
   // dominio del tema (solo si el temario está seedeado y llegó tema_id)
@@ -83,25 +131,25 @@ export async function POST(req: NextRequest) {
       .eq("perfil_id", perfil.id)
       .eq("tema_id", tema_id)
       .maybeSingle();
-    if (previo.data) {
-      await sb
-        .from("progreso_temas")
-        .update({
+    const escritura = previo.data
+      ? await sb
+          .from("progreso_temas")
+          .update({
+            dominio,
+            sesiones_hechas: (previo.data.sesiones_hechas ?? 0) + 1,
+            ultima_sesion: new Date().toISOString(),
+          })
+          .eq("id", previo.data.id)
+      : await sb.from("progreso_temas").insert({
+          perfil_id: perfil.id,
+          tema_id,
+          bloque_id: bloque_id ?? null,
           dominio,
-          sesiones_hechas: (previo.data.sesiones_hechas ?? 0) + 1,
+          sesiones_hechas: 1,
           ultima_sesion: new Date().toISOString(),
-        })
-        .eq("id", previo.data.id);
-    } else {
-      await sb.from("progreso_temas").insert({
-        perfil_id: perfil.id,
-        tema_id,
-        bloque_id: bloque_id ?? null,
-        dominio,
-        sesiones_hechas: 1,
-        ultima_sesion: new Date().toISOString(),
-      });
-    }
+        });
+    const errorProgreso = previo.error ?? escritura.error;
+    if (errorProgreso) console.error(`progreso_temas tema=${tema_id}:`, errorProgreso.message);
   }
 
   // el motor de reorganización del plan llega con la fase de plan;

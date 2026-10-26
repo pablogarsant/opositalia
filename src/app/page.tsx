@@ -24,9 +24,7 @@ export default async function LandingPage() {
       >
         Entrar
       </Link>
-      <p className="mt-16 text-xs text-ink-3">
-        OIR 2026 · Servicio Andaluz de Salud
-      </p>
+      <p className="mt-16 text-xs text-ink-3">Opositalia · powered by Kairos</p>
     </main>
   );
 }

@@ -16,12 +16,19 @@ const DIAS = [
   { n: 0, label: "D" },
 ];
 
+function fechaPorDefecto(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 12); // "listo en 12 meses" por defecto
+  return d.toISOString().slice(0, 10);
+}
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [paso, setPaso] = useState(1);
-  const [fechaExamen, setFechaExamen] = useState("2026-06-14");
+  const [fechaExamen, setFechaExamen] = useState(fechaPorDefecto);
   const [dias, setDias] = useState<number[]>([1, 3, 5]);
   const [horas, setHoras] = useState(2);
+  // "intensidad" es el campo del API; en la UI se llama nivel de profundidad
   const [intensidad, setIntensidad] = useState<"ligera" | "media" | "intensa">("media");
   const [generando, setGenerando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,14 +142,14 @@ export default function OnboardingPage() {
               className="flex items-center justify-between rounded-xl border-2 border-accent bg-accent-dim p-5 text-left transition-transform hover:scale-[1.01]"
             >
               <div>
-                <p className="font-display text-lg font-semibold text-ink">Oftalmólogo/a SAS</p>
-                <p className="text-sm text-ink-2">OIR 2026 · Andalucía · 20 temas del Kanski</p>
+                <p className="font-display text-lg font-semibold text-ink">FEA Oftalmología · SAS Andalucía</p>
+                <p className="text-sm text-ink-2">Temario oficial BOJA · 107 temas</p>
               </div>
               <span className="rounded-full bg-ok-dim px-3 py-1 text-xs font-semibold text-ok">
                 Disponible
               </span>
             </button>
-            {["Medicina Interna SAS", "Neurología SAS"].map((nombre) => (
+            {["FEA Medicina Interna", "FEA Neurología"].map((nombre) => (
               <div
                 key={nombre}
                 className="flex items-center justify-between rounded-xl border border-border bg-surface p-5 opacity-60"
@@ -171,7 +178,11 @@ export default function OnboardingPage() {
 
           <div className="flex flex-col gap-5 rounded-xl border border-border bg-surface p-6">
             <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
-              Fecha del examen
+              ¿Cuándo quieres estar lista?
+              <span className="text-xs font-normal text-ink-3">
+                Puede que la convocatoria aún no esté publicada — pon la fecha en que quieres tener
+                el temario dominado.
+              </span>
               <input
                 type="date"
                 value={fechaExamen}
@@ -216,15 +227,15 @@ export default function OnboardingPage() {
                 </select>
               </label>
               <label className="flex flex-col gap-1.5 text-sm font-medium text-ink">
-                Intensidad
+                Nivel de profundidad
                 <select
                   value={intensidad}
                   onChange={(e) => setIntensidad(e.target.value as typeof intensidad)}
                   className="rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-accent"
                 >
-                  <option value="ligera">Ligera — ritmo cómodo</option>
-                  <option value="media">Media — equilibrada</option>
-                  <option value="intensa">Intensa — máximo</option>
+                  <option value="ligera">Preparación básica</option>
+                  <option value="media">Preparación completa</option>
+                  <option value="intensa">Preparación exhaustiva</option>
                 </select>
               </label>
             </div>

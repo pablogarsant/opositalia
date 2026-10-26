@@ -53,6 +53,39 @@ export type TemaRow = {
   orden: number;
   horas_estimadas: number;
   dificultad: number;
+  // columnas de la migración 0005 (opcionales hasta aplicarla)
+  numero_boja?: number | null;
+  texto_boja?: string | null;
+  parte?: "comun" | "especifica" | null;
+  capitulo_kanski?: string | null;
+  paginas_kanski?: string | null;
+};
+
+export type SubtemaRow = {
+  id: string;
+  tema_id: string | null;
+  titulo: string;
+  orden: number;
+  descripcion: string | null;
+  created_at: string;
+};
+
+export type PuntoRow = {
+  id: string;
+  subtema_id: string | null;
+  titulo: string;
+  orden: number;
+  descripcion: string | null;
+  keywords: string[] | null;
+  created_at: string;
+};
+
+export type ProgresoPuntoRow = {
+  id: string;
+  perfil_id: string;
+  punto_id: string;
+  dominio: number;
+  ultima_sesion: string | null;
 };
 
 export type SesionEstudioInsert = {
@@ -99,6 +132,26 @@ export type ChunkSearchResult = {
   contenido: string;
   metadata: Record<string, unknown>;
   similarity: number;
+};
+
+// Corpus RAG: solo lectura desde la app (lo escribe el pipeline Python)
+export type ChunkRagRow = {
+  id: string;
+  documento_id: string | null;
+  tema_id: string | null;
+  bloque_id: string | null;
+  contenido: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export type DocumentoRow = {
+  id: string;
+  curso_id: string | null;
+  titulo: string;
+  tipo: string | null;
+  fuente: string | null;
+  uploaded_at: string;
 };
 
 export type CursoRow = {
@@ -172,7 +225,7 @@ export type SesionPlanInsert = {
 export type HistorialPlanRow = {
   id: string;
   inscripcion_id: string;
-  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado";
+  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado" | "recreado"; // recreado: migración 0009
   motivo: string;
   detalle: string | null;
   sesion_origen: string | null;
@@ -221,9 +274,38 @@ export type BurocraciaCacheRow = {
   updated_at: string;
 };
 
+export type ContenidoFormateadoRow = {
+  id: string;
+  punto_id: string | null;
+  subtema_id: string | null;
+  contenido_md: string;
+  fuentes: { documento: string; pagina?: string }[] | null;
+  generado_en: string;
+};
+
+export type RelacionTemaRow = {
+  id: string;
+  tema_a_id: string;
+  tema_b_id: string;
+  peso: number;
+  motivo: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
+      contenido_formateado: {
+        Row: ContenidoFormateadoRow;
+        Insert: Omit<ContenidoFormateadoRow, "id" | "generado_en"> & { id?: string };
+        Update: Partial<Omit<ContenidoFormateadoRow, "id">>;
+        Relationships: [];
+      };
+      relaciones_temas: {
+        Row: RelacionTemaRow;
+        Insert: Omit<RelacionTemaRow, "id"> & { id?: string };
+        Update: Partial<Omit<RelacionTemaRow, "id">>;
+        Relationships: [];
+      };
       perfiles: {
         Row: PerfilRow;
         Insert: PerfilInsert;
@@ -240,6 +322,24 @@ export type Database = {
         Row: TemaRow;
         Insert: Omit<TemaRow, "id">;
         Update: Partial<Omit<TemaRow, "id">>;
+        Relationships: [];
+      };
+      subtemas: {
+        Row: SubtemaRow;
+        Insert: Omit<SubtemaRow, "id" | "created_at"> & { descripcion?: string | null };
+        Update: Partial<Omit<SubtemaRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      puntos: {
+        Row: PuntoRow;
+        Insert: Omit<PuntoRow, "id" | "created_at"> & { descripcion?: string | null; keywords?: string[] | null };
+        Update: Partial<Omit<PuntoRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      progreso_puntos: {
+        Row: ProgresoPuntoRow;
+        Insert: Omit<ProgresoPuntoRow, "id"> & { dominio?: number; ultima_sesion?: string | null };
+        Update: Partial<Omit<ProgresoPuntoRow, "id">>;
         Relationships: [];
       };
       sesiones_estudio: {
@@ -270,6 +370,18 @@ export type Database = {
         Row: CursoRow;
         Insert: Omit<CursoRow, "id" | "created_at">;
         Update: Partial<Omit<CursoRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      chunks_rag: {
+        Row: ChunkRagRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      documentos: {
+        Row: DocumentoRow;
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       bloques: {

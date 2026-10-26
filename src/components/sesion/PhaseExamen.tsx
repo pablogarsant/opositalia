@@ -11,11 +11,12 @@ interface Props {
   temaId: string | null;
   bloqueId: string | null;
   bloque: string;
+  sesionPlanId?: string;
 }
 
 const LETRAS = ["A", "B", "C", "D"];
 
-export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque }: Props) {
+export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque, sesionPlanId }: Props) {
   const [indice, setIndice] = useState(0);
   const [elegidas, setElegidas] = useState<(number | null)[]>(preguntas.map(() => null));
   const [resultado, setResultado] = useState<{
@@ -46,6 +47,7 @@ export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque }: Pro
           tema_id: temaId,
           bloque_id: bloqueId,
           bloque,
+          sesion_plan_id: sesionPlanId ?? null,
           correctas,
           total: preguntas.length,
           duracion_seg: Math.round((Date.now() - inicio) / 1000),

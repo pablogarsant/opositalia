@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
+import ChatWidget from "@/components/chat/ChatWidget";
 import { getPerfil } from "@/lib/perfil";
 
 export default async function DashboardLayout({
@@ -34,6 +35,8 @@ export default async function DashboardLayout({
           </div>
         </main>
       </div>
+      {/* consultor IA global: todas las pantallas del dashboard */}
+      <ChatWidget />
     </div>
   );
 }
