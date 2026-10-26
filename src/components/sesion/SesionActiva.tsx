@@ -12,12 +12,19 @@ import { useChatDetalle } from "@/hooks/useChatDetalle";
 import PhaseRepaso from "./PhaseRepaso";
 import PhaseConceptos from "./PhaseConceptos";
 import PhaseMapa from "./PhaseMapa";
-import PhaseLectura from "./PhaseLectura";
+import PhaseLectura, { type PuntoLectura } from "./PhaseLectura";
 import PhaseExamen from "./PhaseExamen";
 
 interface Props {
   tema: string;
   bloque: string;
+  // de sesiones_plan; sin ellos es una sesión libre (refuerzo desde el informe)
+  temaId?: string | null;
+  sesionPlanId?: string;
+  // solo si la sesión que toca no es de hoy: fecha legible para avisar
+  programadaPara?: string;
+  // puntos del tema para la lectura de la fase 4 (vacío en sesiones libres)
+  puntos?: PuntoLectura[];
 }
 
 interface ContenidoCompleto {
@@ -36,18 +43,25 @@ const FASES = [
   { n: 5, nombre: "Examen", icon: FileText },
 ] as const;
 
-async function pedirContenido(tema: string, bloque: string, tipo: string) {
+async function pedirContenido(tema: string, bloque: string, tipo: string, temaId: string | null) {
   const res = await fetch("/api/sesion/contenido", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tema, bloque, tipo_sesion: tipo }),
+    body: JSON.stringify({ tema, bloque, tipo_sesion: tipo, tema_id: temaId }),
   });
   const json = await res.json();
   if (!res.ok || json.error) throw new Error(json.error ?? `HTTP ${res.status}`);
   return json.data;
 }
 
-export default function SesionActiva({ tema, bloque }: Props) {
+export default function SesionActiva({
+  tema,
+  bloque,
+  temaId = null,
+  sesionPlanId,
+  programadaPara,
+  puntos = [],
+}: Props) {
   const { faseActual, setFase } = useSesionStore();
   const [contenido, setContenido] = useState<ContenidoCompleto | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -60,9 +74,9 @@ export default function SesionActiva({ tema, bloque }: Props) {
     try {
       // tres generaciones en paralelo (cacheadas tras la primera vez)
       const [repaso, lectura, examen] = await Promise.all([
-        pedirContenido(tema, bloque, "repaso"),
-        pedirContenido(tema, bloque, "lectura"),
-        pedirContenido(tema, bloque, "examen"),
+        pedirContenido(tema, bloque, "repaso", temaId),
+        pedirContenido(tema, bloque, "lectura", temaId),
+        pedirContenido(tema, bloque, "examen", temaId),
       ]);
       setContenido({
         repaso: repaso.contenido as ContenidoRepaso,
@@ -76,7 +90,7 @@ export default function SesionActiva({ tema, bloque }: Props) {
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo generar la sesión");
     }
-  }, [tema, bloque, setFase]);
+  }, [tema, bloque, temaId, setFase]);
 
   useEffect(() => {
     // data-fetch inicial: los setState ocurren tras await (no síncronos);
@@ -133,6 +147,11 @@ export default function SesionActiva({ tema, bloque }: Props) {
           Sesión activa · {bloque}
         </p>
         <h1 className="font-display text-2xl font-semibold text-ink">{tema}</h1>
+        {programadaPara && (
+          <p className="mt-1 text-sm text-ink-2">
+            Hoy no tienes sesión: esta es la siguiente, programada para el {programadaPara}.
+          </p>
+        )}
       </header>
 
       {/* tabs de fases */}
@@ -173,7 +192,7 @@ export default function SesionActiva({ tema, bloque }: Props) {
         )}
         {faseActual === 3 && <PhaseMapa mapa={contenido.lectura.mapa_mental} onDone={avanzar} />}
         {faseActual === 4 && (
-          <PhaseLectura textos={contenido.lectura.textos} bloque={bloque} onDone={avanzar} />
+          <PhaseLectura puntos={puntos} bloque={bloque} onDone={avanzar} />
         )}
         {faseActual === 5 && (
           <PhaseExamen
@@ -181,6 +200,7 @@ export default function SesionActiva({ tema, bloque }: Props) {
             temaId={contenido.tema_id}
             bloqueId={contenido.bloque_id}
             bloque={bloque}
+            sesionPlanId={sesionPlanId}
           />
         )}
       </section>

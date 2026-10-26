@@ -3,6 +3,8 @@ import type { ChunkRAG } from "@/lib/rag";
 export interface Fuente {
   documento: string;
   pagina?: string;
+  // chunks literales de esta fuente: el visor los abre por id (Fase 8)
+  chunk_ids?: string[];
 }
 
 interface MetaChunk {
@@ -261,9 +263,10 @@ export function fuentesDeChunks(chunks: ChunkRAG[]): Fuente[] {
       (m.libro ? m.libro.replace(/\.pdf$/i, "").replace(/[_-]+/g, " ") : "Temario");
     const pagina = Array.isArray(m.paginas) ? `pp. ${m.paginas[0]}–${m.paginas[1]}` : undefined;
     const k = `${documento}|${pagina ?? ""}`;
-    if (!vistas.has(k)) vistas.set(k, { documento, pagina });
+    if (!vistas.has(k)) vistas.set(k, { documento, pagina, chunk_ids: [] });
+    if (c.id) vistas.get(k)!.chunk_ids!.push(c.id);
   }
-  return [...vistas.values()].slice(0, 6);
+  return [...vistas.values()];
 }
 
 /**

@@ -238,7 +238,7 @@ export default function VistaLibro({ tema, puntoInicial, subtemaInicial }: Props
             <ArrowLeft size={14} aria-hidden /> Volver al temario
           </Link>
           <h1 className="font-display text-2xl font-semibold text-ink">
-            {tema.numero ? `Tema ${tema.numero} — ` : ""}
+            {/* el título ya trae "Tema N —" (temario BOJA) */}
             {tema.titulo}
           </h1>
           <p className="mt-1 text-xs text-ink-3">

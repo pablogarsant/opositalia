@@ -12,7 +12,9 @@ export async function POST(req: NextRequest) {
   try {
     // Verifica la firma svix con CLERK_WEBHOOK_SIGNING_SECRET
     evt = await verifyWebhook(req);
-  } catch {
+  } catch (err) {
+    // Sin este log un secreto que no coincide con el del endpoint es invisible
+    console.error("Webhook Clerk: firma no verificada:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       { data: null, error: "Firma de webhook inválida" },
       { status: 400 }

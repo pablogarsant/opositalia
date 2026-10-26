@@ -5,11 +5,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import type { PuntoArbol } from "@/lib/temario";
-
-export interface Fuente {
-  documento: string;
-  pagina?: string;
-}
+import type { Fuente } from "@/lib/contenido/formatear";
+import FuenteLink from "@/components/shared/FuenteLink";
 
 interface Props {
   punto: PuntoArbol;
@@ -19,7 +16,7 @@ interface Props {
 }
 
 /** Mapeo de markdown → tipografía de lectura (Lora, tablas de verdad). */
-const COMPONENTES: Components = {
+export const COMPONENTES: Components = {
   table: (props) => (
     <div className="my-6 overflow-x-auto">
       <table className="w-full border-collapse text-sm" {...props} />
@@ -136,9 +133,12 @@ export default function ContenidoPunto({ punto, subtemaId, contexto, bloque }: P
       {fuentes.length > 0 && (
         <p className="mt-6 border-t border-border pt-3 text-xs text-ink-3">
           <span className="font-semibold">Fuentes:</span>{" "}
-          {fuentes
-            .map((f) => (f.pagina ? `${f.documento} (${f.pagina})` : f.documento))
-            .join(" · ")}
+          {fuentes.map((f, i) => (
+            <span key={`${f.documento}|${f.pagina ?? ""}`}>
+              {i > 0 && " · "}
+              <FuenteLink fuente={f} />
+            </span>
+          ))}
         </p>
       )}
     </div>

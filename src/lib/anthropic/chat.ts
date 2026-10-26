@@ -1,6 +1,7 @@
 import { anthropic, MODEL } from "./client";
 import { formatearContexto, searchRag } from "@/lib/rag";
-import { getBurocracia } from "@/lib/burocracia";
+import { ENLACE_SAS } from "@/lib/burocracia";
+import { getBurocracia } from "@/lib/burocracia-cache";
 
 export interface MensajeChat {
   role: "user" | "assistant";
@@ -59,20 +60,22 @@ function bloqueBurocracia(datos: Awaited<ReturnType<typeof getBurocracia>>["dato
   const e = datos.estructura_examen;
   return `== DATOS REALES DE LA CONVOCATORIA ==
 Convocatoria: ${datos.convocatoria} — ${datos.especialidad} (${datos.organismo}).
-Plazas: ${datos.total_plazas} totales (${datos.plazas_ope} turno libre, ${datos.plazas_discapacidad} discapacidad).
+Estado: ${datos.estado}
+Plazas: ${datos.total_plazas} totales (${datos.plazas_ope} turno libre, ${datos.plazas_promocion_interna} promoción interna; ${datos.plazas_discapacidad} reservadas a discapacidad).
+Tasa: ${datos.tasa.general} € (${datos.tasa.telematica} € por vía telemática).
 Inscripción: ${datos.plazo_inscripcion_inicio} → ${datos.plazo_inscripcion_fin}.
 Fecha de examen: ${datos.fecha_examen}.
-Examen: ${e.preguntas} preguntas (+${e.preguntas_reserva} de reserva), ${e.duracion_min} minutos, ${e.penalizacion}, nota mínima ${e.nota_minima}.
+Examen: ${e.preguntas} preguntas (${e.teoricas} teóricas + ${e.practicas} prácticas) + ${e.preguntas_reserva} de reserva, ${e.duracion_min} minutos, ${e.penalizacion}. Nota mínima: ${e.nota_minima}.
 Requisitos: ${datos.requisitos.join("; ")}.
 Hitos: ${datos.timeline.map((t) => `${t.fecha} — ${t.hito}${t.completado ? " (hecho)" : ""}`).join(" | ")}.
-Enlace oficial: ${datos.enlace_boja}.
+Enlace oficial: ${ENLACE_SAS}.
 Última actualización: ${datos.ultima_actualizacion}.`;
 }
 
 /** Frase de contexto de pantalla para el system prompt. */
 function bloqueContexto(ctx: ContextoChat): string {
   const partes = [`El usuario está actualmente en: ${ctx.pantalla ?? "dashboard"}.`];
-  if (ctx.tema_titulo) partes.push(`Está consultando el Tema ${ctx.tema_titulo}.`);
+  if (ctx.tema_titulo) partes.push(`Está consultando: ${ctx.tema_titulo}.`);
   if (ctx.punto_titulo) partes.push(`Concretamente el punto: ${ctx.punto_titulo}.`);
   if (ctx.fase_sesion) partes.push(`Va por la fase ${ctx.fase_sesion} de la sesión.`);
   partes.push(
@@ -98,15 +101,25 @@ export async function streamChatConRag(params: {
   const foco = contexto.punto_titulo ?? contexto.tema_titulo ?? null;
   const consulta = foco ? `${mensaje}\n(contexto: ${foco})` : mensaje;
 
+  // el chat responde igual sin RAG o sin burocracia, pero el fallo queda en el log
+  const sinEso =
+    <T,>(que: string, valor: T) =>
+    (e: unknown): T => {
+      console.error(`chat: ${que} falló, se responde sin ello:`, e instanceof Error ? e.message : e);
+      return valor;
+    };
+
   const [chunksIniciales, burocracia] = await Promise.all([
-    searchRag(consulta, bloque, 6).catch(() => []),
-    preguntaDeConvocatoria(mensaje) ? getBurocracia().catch(() => null) : Promise.resolve(null),
+    searchRag(consulta, bloque, 6).catch(sinEso(`searchRag bloque=${bloque ?? "-"}`, [])),
+    preguntaDeConvocatoria(mensaje)
+      ? getBurocracia().catch(sinEso("getBurocracia", null))
+      : Promise.resolve(null),
   ]);
 
   let chunks = chunksIniciales;
   if (chunks.length === 0 && bloque) {
     // el tema puede estar cubierto por otro bloque del corpus
-    chunks = await searchRag(consulta, null, 6).catch(() => []);
+    chunks = await searchRag(consulta, null, 6).catch(sinEso("searchRag sin bloque", []));
   }
   const referencia = formatearContexto(chunks);
 

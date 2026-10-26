@@ -28,7 +28,10 @@ export async function POST(req: NextRequest) {
   }
   const { mensaje, contexto, historial } = parsed.data;
 
-  // el simulacro se hace sin ayuda: chatbot bloqueado en fase 5
+  // el simulacro se hace sin ayuda: chatbot bloqueado en fase 5.
+  // ponytail: la fase la declara el cliente; una llamada directa sin fase_sesion
+  // pasa. Aceptado (Fase 8): es práctica personal. Bloqueo real = guardar el
+  // inicio del simulacro en servidor y consultarlo aquí.
   if (contexto.fase_sesion === 5) {
     return NextResponse.json(
       { data: null, error: "El asistente no está disponible durante el simulacro" },
@@ -52,6 +55,7 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
       } catch (e) {
         const msg = e instanceof Error ? e.message : "error de streaming";
+        console.error("chat: streaming cortado:", msg);
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: msg })}\n\n`));
       } finally {
         controller.close();

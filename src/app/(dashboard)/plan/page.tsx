@@ -4,6 +4,10 @@ import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import PlanLista from "@/components/plan/PlanLista";
+import RecrearPlan from "@/components/plan/RecrearPlan";
+import type { ConfigGeneracion } from "@/lib/plan/generador";
+import { cargarBloquesPlan } from "@/lib/plan/motor";
+import { hoyMadrid } from "@/lib/plan/sesion-actual";
 
 export default async function PlanPage() {
   const user = await currentUser();
@@ -27,7 +31,7 @@ export default async function PlanPage() {
     );
   }
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyMadrid();
   const proximas = sesiones
     .filter((s) => s.estado === "pendiente" || s.fecha_programada >= hoy)
     .slice(0, 20);
@@ -39,8 +43,15 @@ export default async function PlanPage() {
     .order("created_at", { ascending: false })
     .limit(10);
 
-  const horas = (inscripcion.config_plan as { horas_sesion?: number })?.horas_sesion ?? 2;
+  const config = (inscripcion.config_plan ?? {}) as Partial<ConfigGeneracion>;
+  const horas = config.horas_sesion ?? 2;
   const totalPendientes = sesiones.filter((s) => s.estado === "pendiente").length;
+
+  // para el modal de recrear: temario real (ids de verdad) y lo ya completado del plan base
+  const bloques = inscripcion.curso_id ? await cargarBloquesPlan(supabaseAdmin(), inscripcion.curso_id) : [];
+  const hechas = sesiones
+    .filter((s) => s.estado === "completada" && !s.es_refuerzo && s.bloque_id)
+    .map((s) => ({ tema_id: s.tema_id, bloque_id: s.bloque_id!, tipo: s.tipo }));
 
   return (
     <>
@@ -56,13 +67,27 @@ export default async function PlanPage() {
             <p className="mt-1 text-sm text-ink-2">Examen: {inscripcion.fecha_examen}</p>
           )}
         </div>
-        <a
-          href="/api/calendario/ics"
-          download
-          className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-ink-2 hover:border-border-2 hover:text-ink"
-        >
-          Exportar calendario (.ics)
-        </a>
+        <div className="flex flex-wrap gap-2">
+          {bloques.length > 0 && (
+            <RecrearPlan
+              bloques={bloques}
+              hechas={hechas}
+              inicial={{
+                fecha_examen: inscripcion.fecha_examen ?? hoy,
+                dias_semana: config.dias_semana ?? [1, 3, 5],
+                horas_sesion: horas,
+                intensidad: config.intensidad ?? "media",
+              }}
+            />
+          )}
+          <a
+            href="/api/calendario/ics"
+            download
+            className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-ink-2 hover:border-border-2 hover:text-ink"
+          >
+            Exportar calendario (.ics)
+          </a>
+        </div>
       </header>
 
       <PlanLista

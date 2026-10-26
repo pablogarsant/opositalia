@@ -134,6 +134,26 @@ export type ChunkSearchResult = {
   similarity: number;
 };
 
+// Corpus RAG: solo lectura desde la app (lo escribe el pipeline Python)
+export type ChunkRagRow = {
+  id: string;
+  documento_id: string | null;
+  tema_id: string | null;
+  bloque_id: string | null;
+  contenido: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export type DocumentoRow = {
+  id: string;
+  curso_id: string | null;
+  titulo: string;
+  tipo: string | null;
+  fuente: string | null;
+  uploaded_at: string;
+};
+
 export type CursoRow = {
   id: string;
   slug: string;
@@ -205,7 +225,7 @@ export type SesionPlanInsert = {
 export type HistorialPlanRow = {
   id: string;
   inscripcion_id: string;
-  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado";
+  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado" | "recreado"; // recreado: migración 0009
   motivo: string;
   detalle: string | null;
   sesion_origen: string | null;
@@ -350,6 +370,18 @@ export type Database = {
         Row: CursoRow;
         Insert: Omit<CursoRow, "id" | "created_at">;
         Update: Partial<Omit<CursoRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      chunks_rag: {
+        Row: ChunkRagRow;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      documentos: {
+        Row: DocumentoRow;
+        Insert: never;
+        Update: never;
         Relationships: [];
       };
       bloques: {

@@ -6,6 +6,7 @@ import DominioBar from "@/components/dashboard/DominioBar";
 import SessionTypeBadge from "@/components/shared/SessionTypeBadge";
 import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
+import { elegirSesionActual, hoyMadrid } from "@/lib/plan/sesion-actual";
 import { UMBRAL_REFUERZO } from "@/lib/plan/types";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -22,7 +23,7 @@ function saludoPorHora(): string {
 // fuera del componente: la regla react-hooks/purity no aplica a helpers
 function fechasReferencia() {
   return {
-    hoy: new Date().toISOString().slice(0, 10),
+    hoy: hoyMadrid(),
     hace7: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
   };
 }
@@ -78,8 +79,12 @@ export default async function DashboardPage() {
   const horasSemana =
     Math.round(((estudioSemana?.data ?? []).reduce((a, s) => a + (s.duracion_seg ?? 0), 0) / 3600) * 10) / 10;
 
-  const sesionHoy = sesiones.find((s) => s.estado === "pendiente" && s.fecha_programada === hoy);
-  const proximas = sesiones.filter((s) => s.estado === "pendiente" && s.fecha_programada > hoy).slice(0, 3);
+  // misma regla que /sesion (al que enlaza el sidebar): de hoy o, si no hay, la siguiente
+  const sesionHoy = elegirSesionActual(sesiones, hoy);
+  const esDeHoy = sesionHoy?.fecha_programada === hoy;
+  const proximas = sesiones
+    .filter((s) => s.estado === "pendiente" && s.fecha_programada > hoy && s.id !== sesionHoy?.id)
+    .slice(0, 3);
 
   // áreas a reforzar: dominios medios por bloque (peores 5)
   const bloquesTitulos = await sb.from("bloques").select("id, titulo");
@@ -125,7 +130,9 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] text-accent">
-                Sesión de hoy
+                {esDeHoy
+                  ? "Sesión de hoy"
+                  : `Hoy no toca · siguiente: ${new Date(sesionHoy.fecha_programada + "T00:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "short" })}`}
               </p>
               <h2 className="font-display text-lg font-semibold text-ink md:text-xl">
                 {sesionHoy.tema_titulo ?? sesionHoy.bloque_titulo ?? "Sesión"}
@@ -138,7 +145,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href={`/sesion?tema=${encodeURIComponent(sesionHoy.tema_titulo ?? sesionHoy.bloque_titulo ?? "")}&bloque=${encodeURIComponent(sesionHoy.bloque_titulo ?? "")}`}
+                href={`/sesion?id=${sesionHoy.id}`}
                 className="flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg transition-colors hover:bg-accent-2"
               >
                 <Play size={16} aria-hidden />
@@ -160,11 +167,11 @@ export default async function DashboardPage() {
                 Sesión de hoy
               </p>
               <h2 className="font-display text-lg font-semibold text-ink">
-                {inscripcion ? "No tienes sesión programada hoy" : "Aún no tienes plan de estudio"}
+                {inscripcion ? "No quedan sesiones pendientes" : "Aún no tienes plan de estudio"}
               </h2>
               <p className="mt-1 text-sm text-ink-2">
                 {inscripcion
-                  ? "Descansa o adelanta la siguiente sesión del plan."
+                  ? "Has terminado el plan o no hay sesiones desde hoy."
                   : "Configúralo en dos minutos y organiza tu preparación."}
               </p>
             </div>
