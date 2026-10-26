@@ -1,6 +1,6 @@
 import { anthropic, MODEL } from "./client";
 import { formatearContexto, searchRag } from "@/lib/rag";
-import { getBurocracia } from "@/lib/burocracia";
+import { ENLACE_SAS, getBurocracia } from "@/lib/burocracia";
 
 export interface MensajeChat {
   role: "user" | "assistant";
@@ -59,13 +59,15 @@ function bloqueBurocracia(datos: Awaited<ReturnType<typeof getBurocracia>>["dato
   const e = datos.estructura_examen;
   return `== DATOS REALES DE LA CONVOCATORIA ==
 Convocatoria: ${datos.convocatoria} — ${datos.especialidad} (${datos.organismo}).
-Plazas: ${datos.total_plazas} totales (${datos.plazas_ope} turno libre, ${datos.plazas_discapacidad} discapacidad).
+Estado: ${datos.estado}
+Plazas: ${datos.total_plazas} totales (${datos.plazas_ope} turno libre, ${datos.plazas_promocion_interna} promoción interna; ${datos.plazas_discapacidad} reservadas a discapacidad).
+Tasa: ${datos.tasa.general} € (${datos.tasa.telematica} € por vía telemática).
 Inscripción: ${datos.plazo_inscripcion_inicio} → ${datos.plazo_inscripcion_fin}.
 Fecha de examen: ${datos.fecha_examen}.
-Examen: ${e.preguntas} preguntas (+${e.preguntas_reserva} de reserva), ${e.duracion_min} minutos, ${e.penalizacion}, nota mínima ${e.nota_minima}.
+Examen: ${e.preguntas} preguntas (${e.teoricas} teóricas + ${e.practicas} prácticas) + ${e.preguntas_reserva} de reserva, ${e.duracion_min} minutos, ${e.penalizacion}. Nota mínima: ${e.nota_minima}.
 Requisitos: ${datos.requisitos.join("; ")}.
 Hitos: ${datos.timeline.map((t) => `${t.fecha} — ${t.hito}${t.completado ? " (hecho)" : ""}`).join(" | ")}.
-Enlace oficial: ${datos.enlace_boja}.
+Enlace oficial: ${ENLACE_SAS}.
 Última actualización: ${datos.ultima_actualizacion}.`;
 }
 

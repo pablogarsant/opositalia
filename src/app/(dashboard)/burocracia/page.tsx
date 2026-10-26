@@ -1,6 +1,7 @@
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { after } from "next/server";
-import { actualizarBurocracia, getBurocracia } from "@/lib/burocracia";
+import { actualizarBurocracia, ENLACE_SAS, getBurocracia } from "@/lib/burocracia";
+import { hoyMadrid } from "@/lib/plan/sesion-actual";
 
 // dinámico justificado: sirve caché temporal y programa la comprobación
 // web en background — el prerender de build dispararía la búsqueda (>60s)
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BurocraciaPage() {
   const { datos, actualizado, comprobando, cache } = await getBurocracia();
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyMadrid();
 
   if (comprobando) {
     // la búsqueda web corre tras servir la respuesta; el próximo render la ve
@@ -34,10 +35,12 @@ export default async function BurocraciaPage() {
           {comprobando
             ? "Comprobando actualizaciones…"
             : actualizado
-              ? `Actualizado ${new Date(actualizado).toLocaleDateString("es-ES")}`
+              ? `Comprobado el ${new Date(actualizado).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })}`
               : "Datos provisionales"}
         </span>
       </header>
+
+      <p className="mb-6 rounded-xl border border-border bg-surface-2 px-5 py-4 text-sm text-ink">{datos.estado}</p>
 
       {/* plazas + examen */}
       <div className="mb-6 grid gap-4 md:grid-cols-2">
@@ -45,11 +48,16 @@ export default async function BurocraciaPage() {
           <h2 className="mb-4 text-sm font-semibold text-ink">Plazas</h2>
           <p className="font-display text-4xl font-bold text-accent">{datos.total_plazas}</p>
           <p className="mt-1 text-sm text-ink-2">
-            {datos.plazas_ope} turno libre · {datos.plazas_discapacidad} reserva discapacidad
+            {datos.plazas_ope} de turno libre y {datos.plazas_promocion_interna} de promoción interna;{" "}
+            {datos.plazas_discapacidad} reservadas a discapacidad
           </p>
           <div className="mt-4 border-t border-border pt-3 text-sm text-ink-2">
             <p>
               Inscripción: {datos.plazo_inscripcion_inicio} → {datos.plazo_inscripcion_fin}
+            </p>
+            <p className="mt-1">
+              Tasa: {datos.tasa.general.toLocaleString("es-ES")} € ({datos.tasa.telematica.toLocaleString("es-ES")} € por
+              vía telemática)
             </p>
             <p className="mt-1 font-medium text-ink">Examen: {datos.fecha_examen}</p>
           </div>
@@ -60,7 +68,8 @@ export default async function BurocraciaPage() {
           <ul className="flex flex-col gap-2 text-sm text-ink-2">
             <li>
               <span className="font-semibold text-ink">{datos.estructura_examen.preguntas}</span>{" "}
-              preguntas + {datos.estructura_examen.preguntas_reserva} de reserva
+              preguntas ({datos.estructura_examen.teoricas} teóricas + {datos.estructura_examen.practicas}{" "}
+              prácticas) + {datos.estructura_examen.preguntas_reserva} de reserva
             </li>
             <li>
               <span className="font-semibold text-ink">{datos.estructura_examen.duracion_min} min</span>{" "}
@@ -115,16 +124,14 @@ export default async function BurocraciaPage() {
         </ul>
       </section>
 
-      {datos.enlace_boja && (
-        <a
-          href={datos.enlace_boja}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
-        >
-          Ver publicación en el BOJA <ExternalLink size={14} aria-hidden />
-        </a>
-      )}
+      <a
+        href={ENLACE_SAS}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline"
+      >
+        Ver la convocatoria en la web del SAS <ExternalLink size={14} aria-hidden />
+      </a>
     </>
   );
 }
