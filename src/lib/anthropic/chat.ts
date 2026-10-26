@@ -72,7 +72,7 @@ Enlace oficial: ${datos.enlace_boja}.
 /** Frase de contexto de pantalla para el system prompt. */
 function bloqueContexto(ctx: ContextoChat): string {
   const partes = [`El usuario está actualmente en: ${ctx.pantalla ?? "dashboard"}.`];
-  if (ctx.tema_titulo) partes.push(`Está consultando el Tema ${ctx.tema_titulo}.`);
+  if (ctx.tema_titulo) partes.push(`Está consultando: ${ctx.tema_titulo}.`);
   if (ctx.punto_titulo) partes.push(`Concretamente el punto: ${ctx.punto_titulo}.`);
   if (ctx.fase_sesion) partes.push(`Va por la fase ${ctx.fase_sesion} de la sesión.`);
   partes.push(
