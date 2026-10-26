@@ -1,22 +1,15 @@
-import { ExternalLink, RefreshCw } from "lucide-react";
-import { after } from "next/server";
-import { actualizarBurocracia, ENLACE_SAS, getBurocracia } from "@/lib/burocracia";
+import { ExternalLink } from "lucide-react";
+import { ENLACE_SAS } from "@/lib/burocracia";
+import { getBurocracia } from "@/lib/burocracia-cache";
 import { hoyMadrid } from "@/lib/plan/sesion-actual";
 
-// dinámico justificado: sirve caché temporal y programa la comprobación
-// web en background — el prerender de build dispararía la búsqueda (>60s)
+// dinámico: lee la caché en cada visita (la actualiza a mano scripts/actualizar_burocracia.mjs)
 export const dynamic = "force-dynamic";
-// after() vive dentro de esta función: la búsqueda tarda ~65 s (timeout 120 s)
-export const maxDuration = 150;
 
 export default async function BurocraciaPage() {
-  const { datos, actualizado, comprobando, cache } = await getBurocracia();
+  // solo lectura: aquí nunca se busca en internet (cuesta ~0,3 $ por búsqueda)
+  const { datos, actualizado } = await getBurocracia();
   const hoy = hoyMadrid();
-
-  if (comprobando) {
-    // la búsqueda web corre tras servir la respuesta; el próximo render la ve
-    after(() => actualizarBurocracia(cache));
-  }
 
   return (
     <>
@@ -32,13 +25,10 @@ export default async function BurocraciaPage() {
             {datos.especialidad} · {datos.organismo}
           </p>
         </div>
-        <span className="flex items-center gap-2 rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-3">
-          {comprobando && <RefreshCw size={11} className="animate-spin" aria-hidden />}
-          {comprobando
-            ? "Comprobando actualizaciones…"
-            : actualizado
-              ? `Comprobado el ${new Date(actualizado).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })}`
-              : "Datos provisionales"}
+        <span className="rounded-full bg-surface-2 px-3 py-1 text-xs text-ink-3">
+          {actualizado
+            ? `Actualizado el ${new Date(actualizado).toLocaleDateString("es-ES", { timeZone: "Europe/Madrid" })}`
+            : datos.ultima_actualizacion}
         </span>
       </header>
 

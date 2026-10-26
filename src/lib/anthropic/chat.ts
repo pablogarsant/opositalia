@@ -1,6 +1,7 @@
 import { anthropic, MODEL } from "./client";
 import { formatearContexto, searchRag } from "@/lib/rag";
-import { ENLACE_SAS, getBurocracia } from "@/lib/burocracia";
+import { ENLACE_SAS } from "@/lib/burocracia";
+import { getBurocracia } from "@/lib/burocracia-cache";
 
 export interface MensajeChat {
   role: "user" | "assistant";

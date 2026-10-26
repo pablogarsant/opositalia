@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { getBurocracia } from "@/lib/burocracia";
+import { getBurocracia } from "@/lib/burocracia-cache";
 
 export async function GET() {
   const { userId } = await auth();
