@@ -225,7 +225,7 @@ export type SesionPlanInsert = {
 export type HistorialPlanRow = {
   id: string;
   inscripcion_id: string;
-  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado";
+  tipo: "perdida" | "recuperada" | "refuerzo" | "resultado" | "recreado"; // recreado: migración 0009
   motivo: string;
   detalle: string | null;
   sesion_origen: string | null;

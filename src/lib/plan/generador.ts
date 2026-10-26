@@ -118,6 +118,34 @@ export function generarSesiones(params: {
   return sesiones;
 }
 
+/** Sesión del plan ya completada que un plan recreado no debe repetir. */
+export type SesionHecha = Pick<SesionGenerada, "tema_id" | "bloque_id" | "tipo">;
+
+/**
+ * "Recrear conservando progreso": plan completo desde fechaInicio con la config
+ * nueva, menos las sesiones ya completadas (descontadas una a una por
+ * tema + bloque + tipo), con fechas y orden recompactados para no dejar huecos.
+ * Isomorfo: el modal lo usa para el preview y el servidor para persistir.
+ */
+export function replanificar(params: {
+  bloques: BloquePlan[];
+  config: ConfigGeneracion;
+  fechaInicio: Date;
+  hechas: SesionHecha[];
+}): SesionGenerada[] {
+  const todas = generarSesiones(params);
+  const clave = (s: SesionHecha) => `${s.tema_id}|${s.bloque_id}|${s.tipo}`;
+  const porQuitar = new Map<string, number>();
+  for (const h of params.hechas) porQuitar.set(clave(h), (porQuitar.get(clave(h)) ?? 0) + 1);
+  const quedan = todas.filter((s) => {
+    const n = porQuitar.get(clave(s)) ?? 0;
+    if (n > 0) porQuitar.set(clave(s), n - 1);
+    return n === 0;
+  });
+  // las fechas de `todas` son los días disponibles en orden: las primeras N valen
+  return quedan.map((s, i) => ({ ...s, fecha_programada: todas[i].fecha_programada, orden: i }));
+}
+
 /**
  * Primer día disponible del usuario sin sesión ya ocupada, a partir de mañana.
  * Para recuperadas y refuerzos.
