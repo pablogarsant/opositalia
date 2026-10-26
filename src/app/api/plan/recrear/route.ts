@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
     motivo: modo === "cero" ? "Plan recreado desde cero" : "Plan recreado conservando el progreso",
     detalle:
       modo === "cero"
-        ? `Progreso, favoritos${borrar_notas ? " y notas" : ""} borrados; ${nuevas.length} sesiones nuevas.`
+        ? `Progreso${borrar_notas ? ", favoritos y notas" : " y favoritos"} borrados; ${nuevas.length} sesiones nuevas.`
         : `${aBorrar.length} pendientes sustituidas por ${nuevas.length}; ${hechas.length} completadas conservadas.` +
           ` Días ${dias_semana.join(",")}, ${horas_sesion} h, profundidad ${intensidad}, examen ${fecha_examen}.`,
   });
