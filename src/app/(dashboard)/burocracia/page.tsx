@@ -6,6 +6,8 @@ import { hoyMadrid } from "@/lib/plan/sesion-actual";
 // dinámico justificado: sirve caché temporal y programa la comprobación
 // web en background — el prerender de build dispararía la búsqueda (>60s)
 export const dynamic = "force-dynamic";
+// after() vive dentro de esta función: la búsqueda tarda ~65 s (timeout 120 s)
+export const maxDuration = 150;
 
 export default async function BurocraciaPage() {
   const { datos, actualizado, comprobando, cache } = await getBurocracia();

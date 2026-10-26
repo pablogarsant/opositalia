@@ -84,7 +84,8 @@ export const DATOS_FALLBACK: DatosBurocracia = {
 };
 
 const DIAS_CACHE = 7;
-const TIMEOUT_BUSQUEDA_MS = 60_000;
+// medido (Fase 8): 61-67 s con web_search_20260209 (filtrado dinámico); 60 s se quedaba corto
+const TIMEOUT_BUSQUEDA_MS = 120_000;
 
 // ultima_actualizacion fuera del hash: si no, cada comprobación "cambiaría" los datos
 function hashDatos(datos: DatosBurocracia): string {
