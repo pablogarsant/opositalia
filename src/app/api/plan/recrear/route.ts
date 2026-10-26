@@ -7,8 +7,12 @@ import { getPerfil } from "@/lib/perfil";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const bodySchema = z.object({
-  // "empezar de cero" pendiente de decidir qué borra (favoritos y notas)
-  modo: z.literal("conservar"),
+  // conservar: se quedan completadas, progreso, favoritos y notas.
+  // cero: se borra todo lo de estudio (plan, progreso, rachas, favoritos); las notas, solo si se pide.
+  modo: z.enum(["conservar", "cero"]),
+  borrar_notas: z.boolean().default(false),
+  // segunda confirmación obligatoria para "cero": la UI la pide con una casilla aparte
+  confirmo_borrado: z.boolean().default(false),
   fecha_examen: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   dias_semana: z.array(z.number().int().min(0).max(6)).min(1).max(7),
   horas_sesion: z.number().min(0.5).max(6),
@@ -23,10 +27,9 @@ function enLotes<T>(arr: T[], n = 100): T[][] {
 }
 
 /**
- * Recrea el plan con una configuración nueva conservando el progreso:
- * las sesiones completadas y el resto del historial se quedan; las pendientes
- * se sustituyen por un plan nuevo desde hoy sin repetir lo ya completado.
- * /api/plan/generar no sirve: devuelve 409 si ya hay plan.
+ * Recrea el plan con una configuración nueva. /api/plan/generar no sirve: da 409 si ya hay plan.
+ * - conservar: las pendientes se sustituyen por un plan desde hoy sin repetir lo completado.
+ * - cero: plan completo desde hoy y se borra el progreso (y las notas si borrar_notas).
  */
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
@@ -36,7 +39,8 @@ export async function POST(req: NextRequest) {
 
   const parsed = bodySchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return error(`Configuración inválida: ${parsed.error.issues[0]?.message}`, 400);
-  const { fecha_examen, dias_semana, horas_sesion, intensidad } = parsed.data;
+  const { modo, borrar_notas, confirmo_borrado, fecha_examen, dias_semana, horas_sesion, intensidad } = parsed.data;
+  if (modo === "cero" && !confirmo_borrado) return error("Empezar de cero requiere confirmo_borrado=true", 400);
   const config = { dias_semana, horas_sesion, intensidad };
   const sb = supabaseAdmin();
 
@@ -57,10 +61,13 @@ export async function POST(req: NextRequest) {
   if (actuales.error) return error(`sesiones_plan: ${actuales.error.message}`, 500);
 
   // los refuerzos completados son extra: no descuentan sesiones del plan base
-  const hechas = actuales.data
-    .filter((s) => s.estado === "completada" && !s.es_refuerzo && s.bloque_id)
-    .map((s) => ({ tema_id: s.tema_id, bloque_id: s.bloque_id!, tipo: s.tipo }));
-  const pendientes = actuales.data.filter((s) => s.estado === "pendiente").map((s) => s.id);
+  const hechas =
+    modo === "cero"
+      ? []
+      : actuales.data
+          .filter((s) => s.estado === "completada" && !s.es_refuerzo && s.bloque_id)
+          .map((s) => ({ tema_id: s.tema_id, bloque_id: s.bloque_id!, tipo: s.tipo }));
+  const aBorrar = actuales.data.filter((s) => modo === "cero" || s.estado === "pendiente").map((s) => s.id);
 
   let nuevas;
   try {
@@ -73,22 +80,40 @@ export async function POST(req: NextRequest) {
     return error(`No se pudo generar el plan nuevo: ${e instanceof Error ? e.message : e}`, 500);
   }
 
-  // FK sin cascade hacia sesiones_plan: se sueltan las referencias antes de borrar
-  for (const lote of enLotes(pendientes)) {
-    const pasos = [
-      () => sb.from("historial_plan").update({ sesion_origen: null }).in("sesion_origen", lote),
-      () => sb.from("historial_plan").update({ sesion_nueva: null }).in("sesion_nueva", lote),
-      () => sb.from("sesiones_estudio").update({ sesion_plan_id: null }).in("sesion_plan_id", lote),
-      () => sb.from("sesiones_plan").delete().in("id", lote),
+  const fallo = (que: string, r: { error: { message: string } | null }) =>
+    r.error ? error(`Plan nuevo creado, pero falló ${que}: ${r.error.message}`, 500) : null;
+
+  if (modo === "cero") {
+    // sesiones_estudio arrastra respuestas_examen (cascade); el historial se reinicia con el plan
+    const pasos: [string, () => PromiseLike<{ error: { message: string } | null }>][] = [
+      ["sesiones_estudio", () => sb.from("sesiones_estudio").delete().eq("perfil_id", perfil.id)],
+      ["historial_plan", () => sb.from("historial_plan").delete().eq("inscripcion_id", inscripcionId)],
+      ["progreso_puntos", () => sb.from("progreso_puntos").delete().eq("perfil_id", perfil.id)],
+      [
+        "progreso_temas",
+        () => sb.from("progreso_temas").update({ dominio: 0, sesiones_hechas: 0, ultima_sesion: null }).eq("perfil_id", perfil.id),
+      ],
+      ["rachas", () => sb.from("rachas").update({ racha_actual: 0, racha_maxima: 0, ultima_sesion: null }).eq("perfil_id", perfil.id)],
+      ["favoritos", () => sb.from("favoritos").delete().eq("perfil_id", perfil.id)],
     ];
-    for (const paso of pasos) {
-      const r = await paso();
-      if (r.error) {
-        return error(
-          `Plan nuevo creado pero quedan sesiones antiguas pendientes duplicadas: ${r.error.message}`,
-          500
-        );
-      }
+    if (borrar_notas) pasos.push(["notas", () => sb.from("notas").delete().eq("perfil_id", perfil.id)]);
+    for (const [que, paso] of pasos) {
+      const r = fallo(que, await paso());
+      if (r) return r;
+    }
+  }
+
+  // FK sin cascade hacia sesiones_plan: se sueltan las referencias antes de borrar
+  for (const lote of enLotes(aBorrar)) {
+    const pasos: [string, () => PromiseLike<{ error: { message: string } | null }>][] = [
+      ["historial_plan.sesion_origen", () => sb.from("historial_plan").update({ sesion_origen: null }).in("sesion_origen", lote)],
+      ["historial_plan.sesion_nueva", () => sb.from("historial_plan").update({ sesion_nueva: null }).in("sesion_nueva", lote)],
+      ["sesiones_estudio.sesion_plan_id", () => sb.from("sesiones_estudio").update({ sesion_plan_id: null }).in("sesion_plan_id", lote)],
+      ["el borrado de las sesiones antiguas", () => sb.from("sesiones_plan").delete().in("id", lote)],
+    ];
+    for (const [que, paso] of pasos) {
+      const r = fallo(que, await paso());
+      if (r) return r;
     }
   }
 
@@ -101,8 +126,12 @@ export async function POST(req: NextRequest) {
   const hist = await sb.from("historial_plan").insert({
     inscripcion_id: inscripcionId,
     tipo: "recreado",
-    motivo: "Plan recreado conservando el progreso",
-    detalle: `${pendientes.length} pendientes sustituidas por ${nuevas.length}; ${hechas.length} completadas conservadas. Días ${dias_semana.join(",")}, ${horas_sesion} h, profundidad ${intensidad}, examen ${fecha_examen}.`,
+    motivo: modo === "cero" ? "Plan recreado desde cero" : "Plan recreado conservando el progreso",
+    detalle:
+      modo === "cero"
+        ? `Progreso, favoritos${borrar_notas ? " y notas" : ""} borrados; ${nuevas.length} sesiones nuevas.`
+        : `${aBorrar.length} pendientes sustituidas por ${nuevas.length}; ${hechas.length} completadas conservadas.` +
+          ` Días ${dias_semana.join(",")}, ${horas_sesion} h, profundidad ${intensidad}, examen ${fecha_examen}.`,
   });
   if (hist.error) console.error("historial_plan recreado (¿falta la migración 0009?):", hist.error.message);
 

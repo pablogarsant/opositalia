@@ -43,15 +43,23 @@ export default function RecrearPlan({ bloques, hechas, inicial }: Props) {
   const [dias, setDias] = useState(inicial.dias_semana);
   const [horas, setHoras] = useState(inicial.horas_sesion);
   const [intensidad, setIntensidad] = useState(inicial.intensidad);
+  const [modo, setModo] = useState<"conservar" | "cero">("conservar");
+  const [borrarNotas, setBorrarNotas] = useState(false);
+  const [confirmo, setConfirmo] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const preview = useMemo(
     () =>
       dias.length
-        ? calcularPreview(bloques, hechas, { dias_semana: dias, horas_sesion: horas, intensidad }, fechaExamen)
+        ? calcularPreview(
+            bloques,
+            modo === "cero" ? [] : hechas,
+            { dias_semana: dias, horas_sesion: horas, intensidad },
+            fechaExamen
+          )
         : null,
-    [bloques, hechas, dias, horas, intensidad, fechaExamen]
+    [bloques, hechas, modo, dias, horas, intensidad, fechaExamen]
   );
 
   const toggleDia = (n: number) =>
@@ -65,7 +73,9 @@ export default function RecrearPlan({ bloques, hechas, inicial }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          modo: "conservar",
+          modo,
+          borrar_notas: modo === "cero" && borrarNotas,
+          confirmo_borrado: modo === "cero" && confirmo,
           fecha_examen: fechaExamen,
           dias_semana: dias,
           horas_sesion: horas,
@@ -103,10 +113,7 @@ export default function RecrearPlan({ bloques, hechas, inicial }: Props) {
               <h2 id="recrear-titulo" className="font-display text-xl font-semibold">
                 Recrear el plan
               </h2>
-              <p className="mt-1 text-sm text-ink-2">
-                Se conservan tus {hechas.length} sesiones completadas, el progreso, favoritos y notas. Las
-                pendientes se vuelven a repartir desde hoy con esta configuración.
-              </p>
+              <p className="mt-1 text-sm text-ink-2">Cambia la configuración y elige qué pasa con lo que ya llevas.</p>
             </div>
             <button
               type="button"
@@ -117,6 +124,60 @@ export default function RecrearPlan({ bloques, hechas, inicial }: Props) {
               <X size={18} aria-hidden />
             </button>
           </div>
+
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm font-medium">Qué hacer con tu progreso</legend>
+            {(
+              [
+                [
+                  "conservar",
+                  "Conservar mi progreso",
+                  `Se quedan tus ${hechas.length} sesiones completadas, el dominio, favoritos y notas. Las pendientes se reparten de nuevo desde hoy.`,
+                ],
+                [
+                  "cero",
+                  "Empezar de cero",
+                  "Plan nuevo desde hoy. Se borran sesiones hechas, dominio, racha y favoritos.",
+                ],
+              ] as const
+            ).map(([valor, titulo, texto]) => (
+              <label
+                key={valor}
+                className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm ${
+                  modo === valor ? "border-accent bg-accent-dim" : "border-border bg-surface-2"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="modo"
+                  checked={modo === valor}
+                  onChange={() => {
+                    setModo(valor);
+                    setConfirmo(false);
+                  }}
+                  className="mt-0.5 accent-[var(--accent)]"
+                />
+                <span>
+                  <span className="block font-medium">{titulo}</span>
+                  <span className="text-ink-2">{texto}</span>
+                </span>
+              </label>
+            ))}
+          </fieldset>
+
+          {modo === "cero" && (
+            <div className="flex flex-col gap-2 rounded-lg border border-danger/40 bg-danger-dim p-3 text-sm">
+              <label className="flex gap-2">
+                <input type="checkbox" checked={borrarNotas} onChange={(e) => setBorrarNotas(e.target.checked)} />
+                Borrar también mis notas de la agenda
+              </label>
+              <label className="flex gap-2 font-medium text-danger">
+                <input type="checkbox" checked={confirmo} onChange={(e) => setConfirmo(e.target.checked)} />
+                Entiendo que el progreso{borrarNotas ? ", los favoritos y las notas" : " y los favoritos"} se borran
+                y no se pueden recuperar
+              </label>
+            </div>
+          )}
 
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             Fecha objetivo
@@ -191,10 +252,14 @@ export default function RecrearPlan({ bloques, hechas, inicial }: Props) {
           <button
             type="button"
             onClick={() => void recrear()}
-            disabled={guardando || !dias.length}
+            disabled={guardando || !dias.length || (modo === "cero" && !confirmo)}
             className="rounded-lg bg-accent px-6 py-3 text-sm font-medium text-accent-fg hover:bg-accent-2 disabled:opacity-50"
           >
-            {guardando ? "Recreando el plan…" : "Recrear conservando mi progreso"}
+            {guardando
+              ? "Recreando el plan…"
+              : modo === "cero"
+                ? "Borrar y empezar de cero"
+                : "Recrear conservando mi progreso"}
           </button>
         </div>
       </dialog>
