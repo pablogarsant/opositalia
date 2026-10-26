@@ -4,7 +4,7 @@
  * Sin salida de error = todo correcto.
  */
 import assert from "node:assert/strict";
-import { elegirSesionActual, hoyMadrid } from "../src/lib/plan/sesion-actual.ts";
+import { elegirSesionActual, hoyMadrid, semanaDe } from "../src/lib/plan/sesion-actual.ts";
 
 const s = (id, fecha_programada, orden, estado = "pendiente") => ({ id, fecha_programada, orden, estado });
 const elegir = (sesiones, hoy = "2026-10-25") => elegirSesionActual(sesiones, hoy)?.id ?? null;
@@ -25,5 +25,10 @@ assert.equal(elegir([s("sin", "2026-10-25", null), s("con", "2026-10-25", 9)]), 
 // 5. Madrid, no UTC: 23:30 UTC del 25/10 (CET) ya es 26/10 en Madrid; 23:30 UTC del 24/7 (CEST) ya es 25/7
 assert.equal(hoyMadrid(new Date("2026-10-25T23:30:00Z")), "2026-10-26");
 assert.equal(hoyMadrid(new Date("2026-07-24T23:30:00Z")), "2026-07-25");
+
+// 6. Semana natural del informe: lunes a domingo, también si hoy es lunes o domingo
+assert.deepEqual(semanaDe("2026-10-26"), { lunes: "2026-10-26", domingo: "2026-11-01" }); // lunes
+assert.deepEqual(semanaDe("2026-10-29"), { lunes: "2026-10-26", domingo: "2026-11-01" });
+assert.deepEqual(semanaDe("2026-11-01"), { lunes: "2026-10-26", domingo: "2026-11-01" }); // domingo
 
 console.log("check_sesion_actual: OK");

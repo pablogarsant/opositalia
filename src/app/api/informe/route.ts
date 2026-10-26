@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { anthropic, MODEL } from "@/lib/anthropic/client";
 import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
+import { hoyMadrid, semanaDe } from "@/lib/plan/sesion-actual";
 import { UMBRAL_REFUERZO } from "@/lib/plan/types";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -19,14 +20,14 @@ export async function GET() {
   if (!perfil) return NextResponse.json({ data: null, error: "Sin perfil" }, { status: 409 });
 
   const sb = supabaseAdmin();
-  const hace7 = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-  const hace7Fecha = hace7.slice(0, 10);
-  const hoy = new Date().toISOString().slice(0, 10);
+  // semana natural en Madrid (lunes a domingo), incluidas las sesiones que aún no han llegado;
+  // antes eran los 7 días previos en UTC y no contaba el resto de la semana
+  const { lunes, domingo } = semanaDe(hoyMadrid());
+  // ponytail: el lunes a las 00:00 UTC (1-2 h tarde respecto a Madrid) basta para horas y precisión
+  const inicioSemana = `${lunes}T00:00:00Z`;
 
   const { sesiones } = await getPlanUsuario(perfil.id);
-  const semanaPlan = sesiones.filter(
-    (s) => s.fecha_programada >= hace7Fecha && s.fecha_programada <= hoy
-  );
+  const semanaPlan = sesiones.filter((s) => s.fecha_programada >= lunes && s.fecha_programada <= domingo);
   const completadas = semanaPlan.filter((s) => s.estado === "completada").length;
 
   const [estudio, progreso, bloques] = await Promise.all([
@@ -34,7 +35,7 @@ export async function GET() {
       .from("sesiones_estudio")
       .select("id, duracion_seg")
       .eq("perfil_id", perfil.id)
-      .gte("iniciada_en", hace7),
+      .gte("iniciada_en", inicioSemana),
     sb.from("progreso_temas").select("tema_id, bloque_id, dominio").eq("perfil_id", perfil.id),
     sb.from("bloques").select("id, titulo"),
   ]);
