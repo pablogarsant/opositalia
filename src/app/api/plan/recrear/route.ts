@@ -21,6 +21,8 @@ const bodySchema = z.object({
 
 const error = (msg: string, status: number) => NextResponse.json({ data: null, error: msg }, { status });
 
+type Paso = [string, () => PromiseLike<{ error: { message: string } | null }>];
+
 /** Lotes para filtros .in(): cientos de uuids no caben en una URL de PostgREST. */
 function enLotes<T>(arr: T[], n = 100): T[][] {
   return Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, (i + 1) * n));
@@ -85,7 +87,7 @@ export async function POST(req: NextRequest) {
 
   if (modo === "cero") {
     // sesiones_estudio arrastra respuestas_examen (cascade); el historial se reinicia con el plan
-    const pasos: [string, () => PromiseLike<{ error: { message: string } | null }>][] = [
+    const pasos: Paso[] = [
       ["sesiones_estudio", () => sb.from("sesiones_estudio").delete().eq("perfil_id", perfil.id)],
       ["historial_plan", () => sb.from("historial_plan").delete().eq("inscripcion_id", inscripcionId)],
       ["progreso_puntos", () => sb.from("progreso_puntos").delete().eq("perfil_id", perfil.id)],
@@ -105,7 +107,7 @@ export async function POST(req: NextRequest) {
 
   // FK sin cascade hacia sesiones_plan: se sueltan las referencias antes de borrar
   for (const lote of enLotes(aBorrar)) {
-    const pasos: [string, () => PromiseLike<{ error: { message: string } | null }>][] = [
+    const pasos: Paso[] = [
       ["historial_plan.sesion_origen", () => sb.from("historial_plan").update({ sesion_origen: null }).in("sesion_origen", lote)],
       ["historial_plan.sesion_nueva", () => sb.from("historial_plan").update({ sesion_nueva: null }).in("sesion_nueva", lote)],
       ["sesiones_estudio.sesion_plan_id", () => sb.from("sesiones_estudio").update({ sesion_plan_id: null }).in("sesion_plan_id", lote)],

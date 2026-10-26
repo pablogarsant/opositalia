@@ -1,19 +1,7 @@
-import type { TipoSesion } from "./types";
-import { UMBRAL_REFUERZO } from "./types";
 import type { BloquePlan, SesionGenerada } from "./generador";
 import type { supabaseAdmin } from "@/lib/supabase/admin";
 
 type Supabase = ReturnType<typeof supabaseAdmin>;
-
-export function necesitaRefuerzo(dominio: number): boolean {
-  return dominio < UMBRAL_REFUERZO;
-}
-
-export function calcularTipoSiguienteSesion(sesionesHechas: number): TipoSesion {
-  // Ciclo por bloque: lectura → repaso → examen
-  const ciclo: TipoSesion[] = ["lectura", "repaso", "examen"];
-  return ciclo[sesionesHechas % 3];
-}
 
 // ── Persistencia del plan (compartida por /api/plan/generar y /api/plan/recrear) ──
 
