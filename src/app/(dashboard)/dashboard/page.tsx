@@ -6,7 +6,7 @@ import DominioBar from "@/components/dashboard/DominioBar";
 import SessionTypeBadge from "@/components/shared/SessionTypeBadge";
 import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
-import { elegirSesionActual, hoyMadrid } from "@/lib/plan/sesion-actual";
+import { elegirSesionActual, hoyMadrid, sesionesAtrasadas } from "@/lib/plan/sesion-actual";
 import { UMBRAL_REFUERZO } from "@/lib/plan/types";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
@@ -82,6 +82,7 @@ export default async function DashboardPage() {
   // misma regla que /sesion (al que enlaza el sidebar): de hoy o, si no hay, la siguiente
   const sesionHoy = elegirSesionActual(sesiones, hoy);
   const esDeHoy = sesionHoy?.fecha_programada === hoy;
+  const atrasadas = sesionesAtrasadas(sesiones, hoy).length;
   const proximas = sesiones
     .filter((s) => s.estado === "pendiente" && s.fecha_programada > hoy && s.id !== sesionHoy?.id)
     .slice(0, 3);
@@ -123,6 +124,15 @@ export default async function DashboardPage() {
         <StatCard icon={Target} label="Precisión exámenes" value={precision !== null ? String(precision) : "—"} valueSuffix={precision !== null ? "%" : undefined} sub={precision !== null ? "últimas 20 respuestas" : "sin simulacros aún"} />
         <StatCard icon={Clock} label="Horas esta semana" value={String(horasSemana)} sub="de estudio real" />
       </section>
+
+      {atrasadas > 0 && (
+        <p className="mb-3 rounded-lg border border-warn/30 bg-warn-dim px-4 py-3 text-sm text-ink">
+          Tienes {atrasadas} {atrasadas === 1 ? "sesión atrasada" : "sesiones atrasadas"}.{" "}
+          <Link href="/calendario" className="font-medium text-accent hover:underline">
+            Hazlas desde el calendario
+          </Link>
+        </p>
+      )}
 
       {/* Sesión de hoy */}
       <section aria-label="Sesión de hoy" className="mb-5 rounded-xl border border-accent/40 bg-gradient-to-br from-accent-dim to-transparent p-5 md:mb-6 md:p-6">
