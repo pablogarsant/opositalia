@@ -132,7 +132,9 @@ def ingesta_pdf(r: dict, log, progress, task, rehacer: bool = False) -> tuple[in
         if not texto.strip():
             continue
         if idioma_doc is None:
-            idioma_doc = pipeline.detectar_idioma(texto)
+            # el inventario muestrea todo el PDF; aquí solo se verían las primeras páginas,
+            # y un aviso legal en inglés haría traducir entero un libro en español
+            idioma_doc = r["idioma_detectado"] or pipeline.detectar_idioma(texto)
         traducido = False
         if idioma_doc == "en":
             texto = pipeline.traducir(texto, log)

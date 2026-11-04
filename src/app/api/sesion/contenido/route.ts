@@ -1,13 +1,17 @@
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { generarContenidoSesion } from "@/lib/anthropic/sesion";
+import { getPerfil } from "@/lib/perfil";
 import { formatearContexto, searchRag } from "@/lib/rag";
+import { preguntasDeExamen } from "@/lib/sesion/banco";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 
 const bodySchema = z.object({
   tema: z.string().min(2).max(200),
   bloque: z.string().min(2).max(100),
-  tipo_sesion: z.enum(["lectura", "repaso", "examen"]),
+  // las tarjetas de la fase 1 van por /api/sesion/repaso
+  tipo_sesion: z.enum(["lectura", "examen"]),
   // desde el plan llega el id exacto; sin él (refuerzo del informe) se busca por título
   tema_id: z.string().uuid().nullish(),
 });
@@ -47,6 +51,22 @@ export async function POST(req: NextRequest) {
     : consultaTema.ilike("titulo", `%${tema}%`).limit(1).maybeSingle());
   if (temaRes.error) console.error(`temas tema_id=${tema_id ?? "-"} titulo="${tema}":`, temaRes.error.message);
   const temaRow = temaRes.data;
+
+  // con tema conocido, el examen sale de la batería; sin él (refuerzo de un bloque), de la caché
+  const { userId } = await auth();
+  const perfil = userId && tipo_sesion === "examen" && temaRow ? await getPerfil(userId) : null;
+  if (perfil && temaRow) {
+    try {
+      const preguntas = await preguntasDeExamen(perfil.id, { id: temaRow.id, titulo: tema, bloque });
+      return NextResponse.json({
+        data: { contenido: { preguntas }, tema_id: temaRow.id, bloque_id: temaRow.bloque_id ?? null },
+        error: null,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "error preparando el examen";
+      return NextResponse.json({ data: null, error: msg }, { status: 502 });
+    }
+  }
 
   if (cacheado) {
     return NextResponse.json({

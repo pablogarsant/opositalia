@@ -37,7 +37,7 @@ Secciones (menú lateral):
 - Plan de estudio: el calendario de sesiones generado en el onboarding a partir de la fecha de examen, los días y las horas disponibles. Se puede reorganizar.
 - Temario: el temario oficial en dos vistas — árbol (índice navegable con buscador y filtros) y grafo (mapa tipo Obsidian con las conexiones entre temas). Desde cualquier punto se abre la vista libro de lectura.
 - Vista libro (/temario/[tema]): lectura cómoda del tema con índice lateral, modo scroll continuo o modo páginas, tablas y fuentes.
-- Sesión: la sesión de estudio en 5 fases — 1 Repaso (flashcards), 2 Conceptos clave, 3 Mapa mental, 4 Lectura, 5 Examen (simulacro). El asistente está disponible en las fases 1-4 y se bloquea en la fase 5 para que el simulacro sea realista.
+- Sesión: la sesión de estudio en 5 fases — 1 Repaso (tarjetas de la sesión anterior y unas pocas de otras sesiones completadas; se salta en la primera sesión), 2 Conceptos clave, 3 Mapa mental, 4 Lectura, 5 Examen (simulacro). El asistente está disponible en las fases 1-4 y se bloquea en la fase 5 para que el simulacro sea realista.
 - Calendario: vista mensual de las sesiones, con exportación a Google Calendar y .ics. Al abrir un día se puede empezar una sesión, hacer una atrasada (queda completada al terminar el examen) o repetir una ya completada.
 - Informe semanal: qué se ha estudiado, precisión, áreas flojas y sesiones de refuerzo sugeridas.
 - Favoritos: flashcards, ideas clave, mnemotecnias y preguntas guardadas.
