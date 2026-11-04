@@ -4,7 +4,7 @@
  * Sin salida de error = todo correcto.
  */
 import assert from "node:assert/strict";
-import { elegirSesionActual, hoyMadrid, semanaDe } from "../src/lib/plan/sesion-actual.ts";
+import { elegirSesionActual, hoyMadrid, semanaDe, sesionesAtrasadas } from "../src/lib/plan/sesion-actual.ts";
 
 const s = (id, fecha_programada, orden, estado = "pendiente") => ({ id, fecha_programada, orden, estado });
 const elegir = (sesiones, hoy = "2026-10-25") => elegirSesionActual(sesiones, hoy)?.id ?? null;
@@ -30,5 +30,20 @@ assert.equal(hoyMadrid(new Date("2026-07-24T23:30:00Z")), "2026-07-25");
 assert.deepEqual(semanaDe("2026-10-26"), { lunes: "2026-10-26", domingo: "2026-11-01" }); // lunes
 assert.deepEqual(semanaDe("2026-10-29"), { lunes: "2026-10-26", domingo: "2026-11-01" });
 assert.deepEqual(semanaDe("2026-11-01"), { lunes: "2026-10-26", domingo: "2026-11-01" }); // domingo
+
+// 7. Atrasadas: solo pendientes de antes de hoy, la más antigua primero
+assert.deepEqual(
+  sesionesAtrasadas(
+    [
+      s("reciente", "2026-10-24", 2),
+      s("antigua", "2026-10-20", 1),
+      s("hoy", "2026-10-25", 3),
+      s("hecha", "2026-10-19", 0, "completada"),
+      s("perdida", "2026-10-18", 0, "perdida"),
+    ],
+    "2026-10-25"
+  ).map((x) => x.id),
+  ["antigua", "reciente"]
+);
 
 console.log("check_sesion_actual: OK");

@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import type { SesionConTema } from "@/lib/plan/datos";
 import { googleCalendarUrl } from "@/lib/calendar/ics";
+import { hoyMadrid } from "@/lib/plan/sesion-actual";
 
 interface Props {
   sesiones: SesionConTema[];
@@ -17,6 +19,16 @@ const COLOR_ESTADO: Record<string, string> = {
   perdida: "bg-danger",
   saltada: "bg-ink-3",
 };
+
+/**
+ * Qué se puede hacer con una sesión desde el día abierto. Una perdida no se
+ * ofrece: su recuperación ya está en otra fecha y hacerla duplicaría la sesión.
+ */
+function accionSesion(s: SesionConTema, hoy: string): string | null {
+  if (s.estado === "completada") return "Repetir";
+  if (s.estado !== "pendiente") return null;
+  return s.fecha_programada < hoy ? "Hacer ahora" : "Empezar";
+}
 
 export default function CalendarioGrid({ sesiones, horasSesion }: Props) {
   const [mes, setMes] = useState(() => {
@@ -46,7 +58,9 @@ export default function CalendarioGrid({ sesiones, horasSesion }: Props) {
     });
   }, [mes]);
 
-  const hoy = new Date().toISOString().slice(0, 10);
+  const hoy = hoyMadrid();
+  const color = (s: SesionConTema) =>
+    s.estado === "pendiente" && s.fecha_programada < hoy ? "bg-warn" : COLOR_ESTADO[s.estado];
   const fmt = (d: Date) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
@@ -104,7 +118,7 @@ export default function CalendarioGrid({ sesiones, horasSesion }: Props) {
                   {lista.slice(0, 3).map((s) => (
                     <span
                       key={s.id}
-                      className={`h-1.5 w-1.5 rounded-full ${COLOR_ESTADO[s.estado]}`}
+                      className={`h-1.5 w-1.5 rounded-full ${color(s)}`}
                       aria-hidden
                     />
                   ))}
@@ -125,23 +139,36 @@ export default function CalendarioGrid({ sesiones, horasSesion }: Props) {
             })}
           </p>
           <ul className="flex flex-col gap-2">
-            {(porFecha.get(diaAbierto) ?? []).map((s) => (
-              <li key={s.id} className="flex items-center gap-2 text-sm text-ink">
-                <span className={`h-2 w-2 rounded-full ${COLOR_ESTADO[s.estado]}`} aria-hidden />
-                <span className="capitalize text-ink-3">{s.tipo}:</span>
-                <span className="min-w-0 flex-1 truncate">
-                  {s.tema_titulo ?? s.bloque_titulo ?? "Sesión"}
-                </span>
-                <a
-                  href={googleCalendarUrl(s, horasSesion)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-accent hover:underline"
-                >
-                  Google Cal <ExternalLink size={11} aria-hidden />
-                </a>
-              </li>
-            ))}
+            {(porFecha.get(diaAbierto) ?? []).map((s) => {
+              const accion = accionSesion(s, hoy);
+              return (
+                <li key={s.id} className="flex flex-wrap items-center gap-2 text-sm text-ink">
+                  <span className={`h-2 w-2 rounded-full ${color(s)}`} aria-hidden />
+                  <span className="capitalize text-ink-3">{s.tipo}:</span>
+                  <span className="min-w-0 flex-1 truncate">
+                    {s.tema_titulo ?? s.bloque_titulo ?? "Sesión"}
+                  </span>
+                  {accion ? (
+                    <Link
+                      href={`/sesion?id=${s.id}`}
+                      className="rounded-lg bg-accent px-3 py-1 text-xs font-medium text-accent-fg hover:bg-accent-2"
+                    >
+                      {accion}
+                    </Link>
+                  ) : (
+                    s.estado === "perdida" && <span className="text-xs text-ink-3">Reprogramada</span>
+                  )}
+                  <a
+                    href={googleCalendarUrl(s, horasSesion)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-accent hover:underline"
+                  >
+                    Google Cal <ExternalLink size={11} aria-hidden />
+                  </a>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

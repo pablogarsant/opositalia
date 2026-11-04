@@ -4,10 +4,12 @@ import { useState } from "react";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { PreguntaExamen } from "@/lib/anthropic/sesion";
 import { UMBRAL_REFUERZO } from "@/lib/plan/types";
+import { marcarVistos } from "@/lib/sesion/marcar-vistos";
 import FavoritoButton from "@/components/shared/FavoritoButton";
 
 interface Props {
-  preguntas: PreguntaExamen[];
+  // id solo si viene de la batería; un refuerzo de bloque usa la caché y no lo trae
+  preguntas: (PreguntaExamen & { id?: string })[];
   temaId: string | null;
   bloqueId: string | null;
   bloque: string;
@@ -37,6 +39,7 @@ export default function PhaseExamen({ preguntas, temaId, bloqueId, bloque, sesio
 
   const corregir = async () => {
     setCorrigiendo(true);
+    marcarVistos(preguntas.map((p) => p.id));
     const correctas = preguntas.filter((p, i) => elegidas[i] === p.correcta).length;
     const dominioLocal = Math.round((correctas / preguntas.length) * 100);
     try {

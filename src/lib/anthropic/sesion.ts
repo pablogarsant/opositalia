@@ -53,13 +53,18 @@ export async function generarContenidoSesion(
   tipo: TipoSesion,
   tema: string,
   bloque: string,
-  contextoRag: string
+  contextoRag: string,
+  // preguntas ya existentes del tema, para que el lote nuevo no las repita
+  evitar: string[] = []
 ): Promise<ContenidoLectura | ContenidoRepaso | ContenidoExamen> {
   const user = [
     `TEMA: ${tema}`,
     `BLOQUE: ${bloque}`,
     contextoRag ? `\n== CONTEXTO ==\n${contextoRag}` : "\n(sin contexto RAG: usa conocimiento estándar y márcalo prudente)",
     `\n${PROMPTS[tipo]}`,
+    evitar.length
+      ? `\nYa existen estas preguntas. No las repitas ni las reformules; pregunta por otros aspectos del tema:\n${evitar.map((t) => `- ${t}`).join("\n")}`
+      : "",
   ].join("\n");
 
   // streaming: las generaciones largas (examen/lectura) superan el timeout no-stream

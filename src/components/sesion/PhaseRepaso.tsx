@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import type { Flashcard } from "@/lib/anthropic/sesion";
+import type { TarjetaRepaso } from "@/lib/sesion/banco";
+import { marcarVistos } from "@/lib/sesion/marcar-vistos";
 import FavoritoButton from "@/components/shared/FavoritoButton";
 
 interface Props {
-  flashcards: Flashcard[];
+  flashcards: TarjetaRepaso[];
   bloque: string;
   onDone: () => void;
 }
@@ -19,7 +20,20 @@ export default function PhaseRepaso({ flashcards, bloque, onDone }: Props) {
   const carta = flashcards[indice];
   const ultima = indice === flashcards.length - 1;
 
-  if (!carta) return <p className="text-ink-2">Sin flashcards para este tema.</p>;
+  if (!carta) {
+    return (
+      <div className="flex flex-col items-start gap-4">
+        <p className="text-ink-2">Aún no hay sesiones completadas que repasar.</p>
+        <button
+          type="button"
+          onClick={onDone}
+          className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg hover:bg-accent-2"
+        >
+          Siguiente fase: Conceptos
+        </button>
+      </div>
+    );
+  }
 
   const pasar = (delta: number) => {
     setVolteada(false);
@@ -28,9 +42,9 @@ export default function PhaseRepaso({ flashcards, bloque, onDone }: Props) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-4 flex w-full items-center justify-between text-xs text-ink-3">
-        <span>
-          Tarjeta {indice + 1} de {flashcards.length}
+      <div className="mb-4 flex w-full items-center justify-between gap-3 text-xs text-ink-3">
+        <span className="min-w-0 truncate">
+          Tarjeta {indice + 1} de {flashcards.length} · {carta.tema}
         </span>
         <span className="flex items-center gap-1">
           <span className="rounded-full bg-surface-2 px-2.5 py-0.5">
@@ -76,7 +90,10 @@ export default function PhaseRepaso({ flashcards, bloque, onDone }: Props) {
         {ultima ? (
           <button
             type="button"
-            onClick={onDone}
+            onClick={() => {
+              marcarVistos(flashcards.map((f) => f.id));
+              onDone();
+            }}
             className="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-accent-fg hover:bg-accent-2"
           >
             Siguiente fase: Conceptos

@@ -127,6 +127,21 @@ export type SesionCacheRow = {
   created_at: string;
 };
 
+export type BancoItemRow = {
+  id: string;
+  tema_id: string;
+  tipo: "repaso" | "examen";
+  texto: string;
+  contenido: Record<string, unknown>;
+  created_at: string;
+};
+
+export type ItemVistoRow = {
+  perfil_id: string;
+  item_id: string;
+  visto_en: string;
+};
+
 export type ChunkSearchResult = {
   id: string;
   contenido: string;
@@ -364,6 +379,18 @@ export type Database = {
         Row: SesionCacheRow;
         Insert: Omit<SesionCacheRow, "id" | "created_at">;
         Update: Partial<Omit<SesionCacheRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      banco_items: {
+        Row: BancoItemRow;
+        Insert: Omit<BancoItemRow, "id" | "created_at">;
+        Update: Partial<Omit<BancoItemRow, "id" | "created_at">>;
+        Relationships: [];
+      };
+      items_vistos: {
+        Row: ItemVistoRow;
+        Insert: Omit<ItemVistoRow, "visto_en"> & { visto_en?: string };
+        Update: Partial<ItemVistoRow>;
         Relationships: [];
       };
       cursos: {

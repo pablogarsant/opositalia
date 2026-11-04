@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import SesionActiva from "@/components/sesion/SesionActiva";
 import { getPerfil } from "@/lib/perfil";
 import { getPlanUsuario } from "@/lib/plan/datos";
-import { elegirSesionActual, hoyMadrid } from "@/lib/plan/sesion-actual";
+import { elegirSesionActual, hoyMadrid, sesionesAtrasadas } from "@/lib/plan/sesion-actual";
 import { getTemaLibro } from "@/lib/temario";
 
 interface Props {
@@ -91,6 +91,7 @@ export default async function SesionPage({ searchParams }: Props) {
   if (!sesion || (!params.id && sesion.fecha_programada !== hoy)) {
     // sesiones ya viene ordenada por fecha y orden: la última completada es la final
     const ultima = sesiones.filter((s) => s.estado === "completada").at(-1);
+    const atrasadas = sesionesAtrasadas(sesiones, hoy);
     return (
       <div className="rounded-xl border border-border bg-surface p-6">
         <h1 className="font-display text-lg font-semibold text-ink">
@@ -109,6 +110,19 @@ export default async function SesionPage({ searchParams }: Props) {
           ) : (
             <p className="text-sm text-ink-2">No quedan sesiones pendientes en tu plan.</p>
           )}
+          {atrasadas[0] && (
+            <OpcionSesion
+              etiqueta={`Atrasada · ${fechaLarga(atrasadas[0].fecha_programada)}`}
+              titulo={tituloSesion(atrasadas[0])}
+              detalle={
+                atrasadas.length > 1
+                  ? `La más antigua de ${atrasadas.length} atrasadas; el resto, en el calendario`
+                  : "Al terminarla queda completada"
+              }
+              href={`/sesion?id=${atrasadas[0].id}`}
+              accion="Hacer ahora"
+            />
+          )}
           {ultima && (
             <OpcionSesion
               etiqueta={`Última completada · ${fechaLarga(ultima.fecha_programada)}`}
@@ -124,7 +138,15 @@ export default async function SesionPage({ searchParams }: Props) {
   }
 
   const tema = tituloSesion(sesion);
-  const programadaPara = sesion.fecha_programada === hoy ? undefined : fechaLarga(sesion.fecha_programada);
+  const fecha = fechaLarga(sesion.fecha_programada);
+  const aviso =
+    sesion.estado === "completada"
+      ? `Ya completaste esta sesión (${fecha}): la repites como repaso.`
+      : sesion.fecha_programada < hoy
+        ? `Sesión atrasada del ${fecha}: al terminar el examen queda completada.`
+        : sesion.fecha_programada > hoy
+          ? `Sesión programada para el ${fecha}: la estás adelantando.`
+          : undefined;
   // la lectura de la fase 4 va por los puntos oficiales del tema
   const libro = sesion.tema_id ? await getTemaLibro(sesion.tema_id, perfil.id) : null;
   const puntos = (libro?.subtemas ?? []).flatMap((s) =>
@@ -137,7 +159,7 @@ export default async function SesionPage({ searchParams }: Props) {
       bloque={sesion.bloque_titulo ?? tema}
       temaId={sesion.tema_id}
       sesionPlanId={sesion.id}
-      programadaPara={programadaPara}
+      aviso={aviso}
       puntos={puntos}
     />
   );
