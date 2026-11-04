@@ -22,7 +22,7 @@ export function semanaDe(hoy: string): { lunes: string; domingo: string } {
 
 /**
  * Pendiente de hoy con menor orden; si no hay, la siguiente pendiente.
- * Las pendientes atrasadas no cuentan: las recoloca /api/plan/reorganizar.
+ * Las atrasadas no cuentan aquí: se ofrecen aparte con sesionesAtrasadas.
  * null = no queda ninguna pendiente desde hoy (el llamante lo muestra).
  */
 export function elegirSesionActual<T extends SesionSeleccionable>(sesiones: T[], hoy: string): T | null {
@@ -34,4 +34,11 @@ export function elegirSesionActual<T extends SesionSeleccionable>(sesiones: T[],
         (a.orden ?? Number.MAX_SAFE_INTEGER) - (b.orden ?? Number.MAX_SAFE_INTEGER)
     );
   return candidatas[0] ?? null;
+}
+
+/** Pendientes con fecha pasada, de la más antigua a la más reciente. */
+export function sesionesAtrasadas<T extends SesionSeleccionable>(sesiones: T[], hoy: string): T[] {
+  return sesiones
+    .filter((s) => s.estado === "pendiente" && s.fecha_programada < hoy)
+    .sort((a, b) => a.fecha_programada.localeCompare(b.fecha_programada));
 }

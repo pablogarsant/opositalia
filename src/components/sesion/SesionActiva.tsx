@@ -21,8 +21,8 @@ interface Props {
   // de sesiones_plan; sin ellos es una sesión libre (refuerzo desde el informe)
   temaId?: string | null;
   sesionPlanId?: string;
-  // solo si la sesión que toca no es de hoy: fecha legible para avisar
-  programadaPara?: string;
+  // solo si no es la sesión normal de hoy: atrasada, adelantada o repetida
+  aviso?: string;
   // puntos del tema para la lectura de la fase 4 (vacío en sesiones libres)
   puntos?: PuntoLectura[];
 }
@@ -59,7 +59,7 @@ export default function SesionActiva({
   bloque,
   temaId = null,
   sesionPlanId,
-  programadaPara,
+  aviso,
   puntos = [],
 }: Props) {
   const { faseActual, setFase } = useSesionStore();
@@ -147,11 +147,7 @@ export default function SesionActiva({
           Sesión activa · {bloque}
         </p>
         <h1 className="font-display text-2xl font-semibold text-ink">{tema}</h1>
-        {programadaPara && (
-          <p className="mt-1 text-sm text-ink-2">
-            Hoy no tienes sesión: esta es la siguiente, programada para el {programadaPara}.
-          </p>
-        )}
+        {aviso && <p className="mt-1 text-sm text-ink-2">{aviso}</p>}
       </header>
 
       {/* tabs de fases */}
