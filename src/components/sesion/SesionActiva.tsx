@@ -1,12 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Brain, FileText, Lightbulb, Map as MapIcon, RefreshCw } from "lucide-react";
-import type {
-  ContenidoExamen,
-  ContenidoLectura,
-  ContenidoRepaso,
-} from "@/lib/anthropic/sesion";
+import type { ContenidoExamen, ContenidoLectura } from "@/lib/anthropic/sesion";
+import type { TarjetaRepaso } from "@/lib/sesion/banco";
 import { useSesionStore } from "@/stores/sesionStore";
 import { useChatDetalle } from "@/hooks/useChatDetalle";
 import PhaseRepaso from "./PhaseRepaso";
@@ -28,7 +25,7 @@ interface Props {
 }
 
 interface ContenidoCompleto {
-  repaso: ContenidoRepaso;
+  tarjetas: TarjetaRepaso[];
   lectura: ContenidoLectura;
   examen: ContenidoExamen;
   tema_id: string | null;
@@ -54,6 +51,13 @@ async function pedirContenido(tema: string, bloque: string, tipo: string, temaId
   return json.data;
 }
 
+async function pedirTarjetas(): Promise<TarjetaRepaso[]> {
+  const res = await fetch("/api/sesion/repaso");
+  const json = await res.json();
+  if (!res.ok || json.error) throw new Error(json.error ?? `HTTP ${res.status}`);
+  return json.data.tarjetas;
+}
+
 export default function SesionActiva({
   tema,
   bloque,
@@ -66,29 +70,38 @@ export default function SesionActiva({
   const [contenido, setContenido] = useState<ContenidoCompleto | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [faseMax, setFaseMax] = useState(1);
+  // el doble efecto de StrictMode pagaría dos veces un lote nuevo.
+  // ponytail: dos pestañas a la vez aún pueden generar dos lotes; el coste es de 0,12 $ como mucho
+  const cargando = useRef(false);
 
   // el consultor global vive en el layout: aquí solo se publica qué se estudia
   useChatDetalle({ tema_titulo: tema, bloque });
 
   const cargar = useCallback(async () => {
+    if (cargando.current) return;
+    cargando.current = true;
     try {
-      // tres generaciones en paralelo (cacheadas tras la primera vez)
-      const [repaso, lectura, examen] = await Promise.all([
-        pedirContenido(tema, bloque, "repaso", temaId),
+      // en paralelo; solo se paga lo que aún no existe
+      const [tarjetas, lectura, examen] = await Promise.all([
+        pedirTarjetas(),
         pedirContenido(tema, bloque, "lectura", temaId),
         pedirContenido(tema, bloque, "examen", temaId),
       ]);
       setContenido({
-        repaso: repaso.contenido as ContenidoRepaso,
+        tarjetas,
         lectura: lectura.contenido as ContenidoLectura,
         examen: examen.contenido as ContenidoExamen,
         tema_id: lectura.tema_id ?? null,
         bloque_id: lectura.bloque_id ?? null,
       });
-      // la sesión siempre arranca en fase 1 (async: no dispara render en cascada)
-      setFase(1);
+      // sin nada que repasar (primera sesión) se empieza en la fase 2
+      const inicio = tarjetas.length ? 1 : 2;
+      setFase(inicio);
+      setFaseMax(inicio);
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudo generar la sesión");
+    } finally {
+      cargando.current = false;
     }
   }, [tema, bloque, temaId, setFase]);
 
@@ -133,8 +146,8 @@ export default function SesionActiva({
         <Brain size={40} className="animate-pulse text-accent" aria-hidden />
         <p className="font-display text-lg text-ink">Preparando tu sesión…</p>
         <p className="max-w-sm text-center text-sm text-ink-2">
-          La IA está generando flashcards, textos y simulacro a partir del temario. La primera
-          vez tarda ~1 minuto; después queda cacheado.
+          Preparando las tarjetas de repaso, los conceptos y el simulacro. Si hay que generar
+          material nuevo, tarda ~1 minuto.
         </p>
       </div>
     );
@@ -181,7 +194,7 @@ export default function SesionActiva({
       {/* contenido de la fase */}
       <section className="rounded-xl border border-border bg-surface p-5 md:p-7">
         {faseActual === 1 && (
-          <PhaseRepaso flashcards={contenido.repaso.flashcards} bloque={bloque} onDone={avanzar} />
+          <PhaseRepaso flashcards={contenido.tarjetas} bloque={bloque} onDone={avanzar} />
         )}
         {faseActual === 2 && (
           <PhaseConceptos conceptos={contenido.lectura.conceptos_clave} onDone={avanzar} />

@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       ],
       ["rachas", () => sb.from("rachas").update({ racha_actual: 0, racha_maxima: 0, ultima_sesion: null }).eq("perfil_id", perfil.id)],
       ["favoritos", () => sb.from("favoritos").delete().eq("perfil_id", perfil.id)],
+      ["items_vistos", () => sb.from("items_vistos").delete().eq("perfil_id", perfil.id)],
     ];
     if (borrar_notas) pasos.push(["notas", () => sb.from("notas").delete().eq("perfil_id", perfil.id)]);
     for (const [que, paso] of pasos) {
